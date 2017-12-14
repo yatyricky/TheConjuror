@@ -6,6 +6,8 @@ public class DataManager : MonoBehaviour
 {
     public TextAsset allCards;
     public TextAsset decks;
+    public GameObject[] CardSlots;
+    public GameObject[] HandAreas;
 
     private List<Deck> deckTemplates;
     private List<Card> cardBase;

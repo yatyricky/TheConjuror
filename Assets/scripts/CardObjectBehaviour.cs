@@ -16,6 +16,32 @@ public class CardObjectBehaviour : MonoBehaviour {
     public Image cardCostImage;
     public Text cardCostNumber;
 
+    private Card cardData;
+    public Card CardData
+    {
+        get
+        {
+            return cardData;
+        }
+        set
+        {
+            cardData = value;
+        }
+    }
+
+    private int owner;
+    public int Owner
+    {
+        get
+        {
+            return owner;
+        }
+        set
+        {
+            owner = value;
+        }
+    }
+
     private float order;
     public float Order
     {

@@ -7,6 +7,7 @@ public class DeckObjectBehaviour : MonoBehaviour
 {
     public Text cardsRemaining;
     public GameObject cardPrefab;
+    public GameObject handArea;
     public int whichPlayer;
 
     private float zOffset;
@@ -38,7 +39,6 @@ public class DeckObjectBehaviour : MonoBehaviour
         for (int i = 0; i < cardList.Count; i ++)
         {
             GameObject co = Instantiate(cardPrefab, new Vector3(prefabOrigin.x, prefabOrigin.y, prefabOrigin.z + zOffset), Quaternion.identity);
-            co.SetActive(true);
             CardObjectBehaviour cob = co.GetComponent<CardObjectBehaviour>();
 
             // card visual
@@ -62,6 +62,11 @@ public class DeckObjectBehaviour : MonoBehaviour
                 cob.cardPowerFrame.enabled = false;
                 cob.cardPower.enabled = false;
             }
+
+            cob.Owner = whichPlayer;
+            cob.CardData = cardList.ElementAt(i);
+
+            handArea.GetComponent<HandObjectBehaviour>().AddCard(co);
         }
 
         cardsRemaining.text = Player.P(whichPlayer).Deck.Size.ToString();

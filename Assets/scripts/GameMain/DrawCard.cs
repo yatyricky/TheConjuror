@@ -15,10 +15,9 @@ public class DrawCard : GameAction
 
     public override void Fire(UpdateUICallBack callBack)
     {
-        Deck deck = Player.P(player).Deck;
         for (int i = 0; i < num; i ++)
         {
-            drawn.Add(deck.DrawRandom());
+            drawn.Add(Player.P(player).DrawRandom());
         }
         callBack(drawn);
     }

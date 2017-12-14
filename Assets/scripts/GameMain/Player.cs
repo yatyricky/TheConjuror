@@ -4,9 +4,11 @@ using UnityEngine;
 
 public class Player
 {
-    private int id;
     private Deck deck = null;
     private List<Card> hand;
+    private List<Card> creature;
+    private List<Card> grave;
+    private CardSlot[] cardSlots;
 
     private static Player[] players = null;
 
@@ -24,11 +26,60 @@ public class Player
         return players[id];
     }
 
+    private Player()
+    {
+        hand = new List<Card>();
+        creature = new List<Card>();
+        grave = new List<Card>();
+        cardSlots = new CardSlot[5];
+        cardSlots[0] = new CardSlot(Colors.WHITE);
+        cardSlots[1] = new CardSlot(Colors.BLUE);
+        cardSlots[2] = new CardSlot(Colors.ALL);
+        cardSlots[3] = new CardSlot(Colors.GREEN);
+        cardSlots[4] = new CardSlot(Colors.RED);
+    }
+
     public Deck Deck
     {
         get
         {
             return deck;
+        }
+    }
+
+    internal Card DrawRandom()
+    {
+        Card card = deck.DrawRandom();
+        hand.Add(card);
+        return card;
+    }
+
+    internal void PlayCardFromHand(Card card)
+    {
+        Card toPlay = null;
+        int index = -1;
+        for (int i = 0; i < hand.Count; i++)
+        {
+            if (hand.ElementAt(i) == card)
+            {
+                toPlay = hand.ElementAt(i);
+                index = i;
+            }
+        }
+        if (toPlay == null)
+        {
+            throw new System.Exception("Trying to play card that not in hand");
+        }
+        hand.RemoveAt(index);
+
+        if (toPlay.type.Equals(CardTypes.CREATURE))
+        {
+            creature.Add(toPlay);
+        }
+        else
+        {
+            // TODO playing enchantments, spells
+            grave.Add(toPlay);
         }
     }
 
