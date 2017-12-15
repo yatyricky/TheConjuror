@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
+using DG.Tweening;
 
 public class DragHandCard : DraggingActions
 {
     private static GameObject[] cardSlots = null;
-    private GameObject endSlot = null;
 
     private void Awake()
     {
@@ -37,7 +37,7 @@ public class DragHandCard : DraggingActions
         DisableAllGlow();
 
         // find cardslot when end drag
-        endSlot = null;
+        GameObject endSlot = null;
         RaycastHit[] hits = Physics.RaycastAll(origin: new Vector3(transform.position.x, transform.position.y, -10), direction: new Vector3(0, 0, 1), maxDistance: 30f);
         foreach (RaycastHit h in hits)
         {
@@ -48,14 +48,22 @@ public class DragHandCard : DraggingActions
         }
         if (endSlot != null)
         {
+            // Dragged into a cardslot
             CardObjectBehaviour cob = gameObject.GetComponent<CardObjectBehaviour>();
             new PlayCard(cob.Owner, cob.CardData).Fire(UpdateUI);
+        }
+        else
+        {
+            // Dragged into somewhere else
+            CardObjectBehaviour cob = gameObject.GetComponent<CardObjectBehaviour>();
+            transform.DOMove(cob.OriginPos, 0.5f).SetEase(Ease.OutCubic);
         }
     }
 
     /// <summary>
     /// 1. Make creatures un draggale
     /// 2. Remove CardObject from HandObject
+    /// 3. Ease/ re-organize cards in card slot
     /// </summary>
     /// <param name="payload"></param>
     private void UpdateUI(object payload)
@@ -66,11 +74,12 @@ public class DragHandCard : DraggingActions
         DataManager dm = GameObject.FindGameObjectWithTag("GameData").GetComponent<DataManager>();
         HandObjectBehaviour hob = dm.HandAreas[(int)payload].GetComponent<HandObjectBehaviour>();
         hob.RemoveCard(gameObject);
+        // Ease/ re-organize cards in card slot
+        // TODO
     }
 
     public override void OnStartDrag()
     {
-        
     }
 
     protected override bool DragSuccessful()

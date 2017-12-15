@@ -37,6 +37,8 @@ public class HandObjectBehaviour : MonoBehaviour
             {
                 Vector3 pos = new Vector3(basePos.x + i * cardWidth * 1.03f, basePos.y, basePos.z);
                 cardObjs.ElementAt(i).transform.position = pos;
+                CardObjectBehaviour cob = cardObjs.ElementAt(i).GetComponent<CardObjectBehaviour>();
+                cob.OriginPos = pos;
 
                 cardObjs.ElementAt(i).SetActive(true);
             }
