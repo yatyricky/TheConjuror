@@ -1,73 +1,60 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
 
 public class CardObjectBehaviour : MonoBehaviour
 {
-    public Image cardClass; // earth/ fire/ air/ water
-    public Image cardImage; // the graphics
-    public Text cardName; // card name
-    public Image cardTypeFrame;
-    public Image cardType;
-    public Image cardPowerFrame;
-    public Text cardPower;
-    public Text cardDescription;
-    public Image cardCostImage;
-    public Text cardCostNumber;
+    public Image CardClass; // earth/ fire/ air/ water
+    public Image CardImage; // the graphics
+    public Text CardName; // card name
+    public Image CardTypeFrame;
+    public Image CardType;
+    public Image CardPowerFrame;
+    public Text CardPower;
+    public Text CardDescription;
+    public Image CardCostImage;
+    public Text CardCostNumber;
+
+    private static float zOffset = 0.5f;
+    private float order;
 
     private Vector3 originPos;
-    public Vector3 OriginPos
-    {
-        get { return originPos; }
-        set { originPos = value; }
-    }
-
     private Card cardData;
-    public Card CardData
-    {
-        get { return cardData; }
-        set { cardData = value; }
-    }
+    private PlayerObjectBehaviour owner;
+    private bool mouseHovering;
+    private bool isPreviewing;
 
-    private int owner;
-    public int Owner
-    {
-        get { return owner; }
-        set { owner = value; }
-    }
+    public Vector3 OriginPos {get{ return originPos; } set { originPos = value;}}
+    public Card CardData {get { return cardData; } set { cardData = value; }}
+    public PlayerObjectBehaviour Owner {get { return owner; }set { owner = value; }}
+    public float Order {get { return order; }set { order = value; }}
 
-    private float order;
-    public float Order
-    {
-        get { return order; }
-        set { order = value; }
-    }
-
-    private static float zOffset = 0f;
-    public static GameObject Create(Card cardData, int player)
+    public static GameObject Create(Card cardData, PlayerObjectBehaviour player)
     {
         GameObject co = Instantiate(Resources.Load("prefabs/CardObject")) as GameObject;
         CardObjectBehaviour cob = co.GetComponent<CardObjectBehaviour>();
 
         // card visual
-        cob.cardImage.sprite = IMG2Sprite.LoadNewSprite(Application.dataPath + "/sprites/card_images/" + cardData.id + ".png");
-        cob.cardName.text = cardData.name;
-        cob.cardClass.sprite = IMG2Sprite.LoadNewSprite(Application.dataPath + "/sprites/card_ui/frame_" + cardData.color + ".png");
-        cob.cardType.sprite = IMG2Sprite.LoadNewSprite(Application.dataPath + "/sprites/card_ui/type_" + cardData.type + ".png");
-        cob.cardPower.text = cardData.power.ToString();
-        cob.cardDescription.text = cardData.description.Replace("|n", "\n");
-        cob.cardCostNumber.text = cardData.cost.ToString();
-        cob.cardCostImage.sprite = IMG2Sprite.LoadNewSprite(Application.dataPath + "/sprites/card_ui/mana_" + cardData.color + ".png");
-        Sprite powerFrame = IMG2Sprite.LoadNewSprite(Application.dataPath + "/sprites/card_ui/power_" + cardData.color + ".png");
-        cob.cardTypeFrame.sprite = powerFrame;
-        cob.cardPowerFrame.sprite = powerFrame;
+        cob.CardImage.sprite = IMG2Sprite.LoadNewSprite(Application.dataPath + "/sprites/card_images/" + cardData.Id + ".png");
+        cob.CardName.text = cardData.Name;
+        cob.CardClass.sprite = IMG2Sprite.LoadNewSprite(Application.dataPath + "/sprites/card_ui/frame_" + cardData.Color + ".png");
+        cob.CardType.sprite = IMG2Sprite.LoadNewSprite(Application.dataPath + "/sprites/card_ui/type_" + cardData.Type + ".png");
+        cob.CardPower.text = cardData.Power.ToString();
+        cob.CardDescription.text = cardData.Description.Replace("|n", "\n");
+        cob.CardCostNumber.text = cardData.Cost.ToString();
+        cob.CardCostImage.sprite = IMG2Sprite.LoadNewSprite(Application.dataPath + "/sprites/card_ui/mana_" + cardData.Color + ".png");
+        Sprite powerFrame = IMG2Sprite.LoadNewSprite(Application.dataPath + "/sprites/card_ui/power_" + cardData.Color + ".png");
+        cob.CardTypeFrame.sprite = powerFrame;
+        cob.CardPowerFrame.sprite = powerFrame;
 
         // layout
         cob.Order = zOffset;
+        cob.isPreviewing = false;
 
-        if (!cardData.type.Equals(CardTypes.CREATURE))
+        if (!cardData.Type.Equals(CardTypes.CREATURE))
         {
-            cob.cardPowerFrame.enabled = false;
-            cob.cardPower.enabled = false;
+            cob.CardPowerFrame.enabled = false;
+            cob.CardPower.enabled = false;
         }
 
         cob.Owner = player;
@@ -77,8 +64,6 @@ public class CardObjectBehaviour : MonoBehaviour
         return co;
     }
 
-    private bool mouseHovering;
-
     private void Awake()
     {
         mouseHovering = false;
@@ -86,19 +71,33 @@ public class CardObjectBehaviour : MonoBehaviour
 
     private void OnMouseOver()
     {
-        if (!mouseHovering)
+        if (!mouseHovering && !isPreviewing)
         {
-            gameObject.transform.Translate(new Vector3(0, 0, -1f));
+            gameObject.transform.position = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y, -2f);
             mouseHovering = true;
+        }
+
+        if (Input.GetAxis("Mouse ScrollWheel") > 0f)
+        {
+            gameObject.transform.DOMove(new Vector3(0f, 0f, -2f), 0.2f).SetEase(Ease.OutCubic);
+            gameObject.transform.DOScale(2f, 0.2f).SetEase(Ease.OutCubic);
+            isPreviewing = true;
+        }
+        if (Input.GetAxis("Mouse ScrollWheel") < 0f)
+        {
+            gameObject.transform.DOMove(originPos, 0.2f).SetEase(Ease.OutCubic);
+            gameObject.transform.DOScale(1f, 0.2f).SetEase(Ease.OutCubic);
+            isPreviewing = false;
         }
     }
 
     private void OnMouseExit()
     {
-        if (mouseHovering)
+        if (mouseHovering && !isPreviewing)
         {
-            gameObject.transform.Translate(new Vector3(0, 0, Order - gameObject.transform.position.z));
+            gameObject.transform.position = originPos;
             mouseHovering = false;
         }
     }
+
 }

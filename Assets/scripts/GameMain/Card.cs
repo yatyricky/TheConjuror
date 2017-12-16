@@ -1,23 +1,37 @@
-﻿public class Card
+﻿using System;
+using UnityEngine;
+
+public class Card
 {
-    public int id;
-    public string name;
-    public string color;
-    public string type;
-    public int cost;
-    public string description;
+    public int Id;
+    public string Name;
+    public string Color;
+    public string Type;
+    public int Cost;
+    public string Description;
 
-    public int power; // creature only
+    public int Power; // creature only
+    public int MaxPower;
 
-    public Card(int id, string name, string color, string type, int cost, string description, int power)
+    public Card(int id)
     {
-        this.id = id;
-        this.name = name;
-        this.color = color;
-        this.type = type;
-        this.cost = cost;
-        this.description = description;
-        this.power = power;
+        DataManager dm = GameObject.FindGameObjectWithTag("GameData").GetComponent<DataManager>();
+        DataManager.CardData cd;
+        if (dm.CardBase.TryGetValue(id, out cd))
+        {
+            Id = id;
+            Name = cd.Name;
+            Color = cd.Color;
+            Type = cd.Type;
+            Cost = cd.Cost;
+            Description = cd.Description;
+            Power = cd.Power;
+            MaxPower = Power;
+        }
+        else
+        {
+            throw new Exception("Creating card from unknown id:" + id.ToString());
+        }
     }
 
 }

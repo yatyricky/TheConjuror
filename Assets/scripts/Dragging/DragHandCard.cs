@@ -3,21 +3,23 @@ using DG.Tweening;
 
 public class DragHandCard : DraggingActions
 {
-    private static GameObject[] cardSlots = null;
-
     private void Awake()
     {
         dragabble = true;
-        cardSlots = GameObject.FindGameObjectWithTag("GameData").GetComponent<DataManager>().CardSlots;
     }
 
     public override void OnDraggingInUpdate()
     {
         DisableAllGlow();
         RaycastHit[] hits = Physics.RaycastAll(origin: new Vector3(transform.position.x, transform.position.y, -10), direction: new Vector3(0, 0, 1), maxDistance: 30f);
+        // find card owner
+        CardObjectBehaviour cob = gameObject.GetComponent<CardObjectBehaviour>();
         foreach (RaycastHit h in hits)
         {
-            if (h.transform.tag == "CardSlot")
+            // Find slot owner
+            PlayerObjectBehaviour hitPob = GameLoop.FindParentWithTag(h.transform.gameObject, "Player").GetComponent<PlayerObjectBehaviour>();
+
+            if (h.transform.tag == "CardSlot" && hitPob.PlayerId == cob.Owner.PlayerId)
             {
                 h.transform.Find("glow").gameObject.SetActive(true);
             }
@@ -26,9 +28,10 @@ public class DragHandCard : DraggingActions
 
     private void DisableAllGlow()
     {
-        foreach (GameObject cs in cardSlots)
+        GameObject[] cardSlots = gameObject.GetComponent<CardObjectBehaviour>().Owner.CardSlots;
+        for (int i = 0; i < cardSlots.Length; i ++)
         {
-            cs.transform.Find("glow").gameObject.SetActive(false);
+            cardSlots[i].transform.Find("glow").gameObject.SetActive(false);
         }
     }
 
@@ -50,7 +53,8 @@ public class DragHandCard : DraggingActions
         {
             // Dragged into a cardslot
             CardObjectBehaviour cob = gameObject.GetComponent<CardObjectBehaviour>();
-            new PlayCard(cob.Owner, cob.CardData).Fire(UpdateUI);
+            CardSlotBehaviour csb = endSlot.GetComponent<CardSlotBehaviour>();
+            new PlayCard(cob.Owner.Player, cob.CardData, csb.SlotId).Fire(UpdateUI);
         }
         else
         {
@@ -68,14 +72,15 @@ public class DragHandCard : DraggingActions
     /// <param name="payload"></param>
     private void UpdateUI(object payload)
     {
+        PlayerObjectBehaviour pob = gameObject.GetComponent<CardObjectBehaviour>().Owner;
+        int slot = (int)payload;
         // 1.Make creatures un draggale
         dragabble = false;
         // 2. Remove CardObject from HandObject
-        DataManager dm = GameObject.FindGameObjectWithTag("GameData").GetComponent<DataManager>();
-        HandObjectBehaviour hob = dm.HandAreas[(int)payload].GetComponent<HandObjectBehaviour>();
-        hob.RemoveCard(gameObject);
+        pob.HandArea.GetComponent<HandObjectBehaviour>().RemoveCard(gameObject);
         // Ease/ re-organize cards in card slot
-        // TODO
+        CardSlotBehaviour csb = pob.CardSlots[slot].GetComponent<CardSlotBehaviour>();
+        csb.AddCard(gameObject);
     }
 
     public override void OnStartDrag()
@@ -85,17 +90,5 @@ public class DragHandCard : DraggingActions
     protected override bool DragSuccessful()
     {
         return true;
-    }
-
-    // Use this for initialization
-    void Start()
-    {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
     }
 }

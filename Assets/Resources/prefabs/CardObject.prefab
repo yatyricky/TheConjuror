@@ -148,7 +148,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!1 &1396904036475184
 GameObject:
   m_ObjectHideFlags: 1
@@ -308,7 +308,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1331447440715208}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -0.017578125}
+  m_LocalPosition: {x: 0, y: 0, z: -1.07}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 224830598893140922}
@@ -360,7 +360,7 @@ MonoBehaviour:
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
-    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+    m_Font: {fileID: 12800000, guid: dd1378691f9a2a44cac7aed5afe863ce, type: 3}
     m_FontSize: 24
     m_FontStyle: 0
     m_BestFit: 0
@@ -384,17 +384,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3e9e10e3ad8f3d4bbf8bf34b9c29a95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardPrefab: {fileID: 1331447440715208}
-  cardClass: {fileID: 114994417828532516}
-  cardImage: {fileID: 114304237489302886}
-  cardName: {fileID: 114110672522887164}
-  cardTypeFrame: {fileID: 114286128468399832}
-  cardType: {fileID: 114683882143449576}
-  cardPowerFrame: {fileID: 114107957025680920}
-  cardPower: {fileID: 114026156074239546}
-  cardDescription: {fileID: 114940404355544494}
-  cardCostImage: {fileID: 114126880985932278}
-  cardCostNumber: {fileID: 114821707625485186}
+  CardClass: {fileID: 114994417828532516}
+  CardImage: {fileID: 114304237489302886}
+  CardName: {fileID: 114110672522887164}
+  CardTypeFrame: {fileID: 114286128468399832}
+  CardType: {fileID: 114683882143449576}
+  CardPowerFrame: {fileID: 114107957025680920}
+  CardPower: {fileID: 114026156074239546}
+  CardDescription: {fileID: 114940404355544494}
+  CardCostImage: {fileID: 114126880985932278}
+  CardCostNumber: {fileID: 114821707625485186}
 --- !u!114 &114107957025680920
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -723,7 +722,7 @@ MonoBehaviour:
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
-    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+    m_Font: {fileID: 12800000, guid: dd1378691f9a2a44cac7aed5afe863ce, type: 3}
     m_FontSize: 24
     m_FontStyle: 0
     m_BestFit: 0
@@ -768,7 +767,7 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 24
+    m_FontSize: 36
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 2

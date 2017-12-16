@@ -5,18 +5,24 @@ using UnityEngine.UI;
 
 public class DeckObjectBehaviour : MonoBehaviour
 {
-    public Text cardsRemaining;
-    public GameObject handArea;
-    public int whichPlayer;
+    public Text CardsRemaining;
+
+    private PlayerObjectBehaviour pob;
 
     private void Start()
     {
-        cardsRemaining.text = Player.P(whichPlayer).Deck.Size.ToString();
+        pob = GameLoop.FindParentWithTag(gameObject, "Player").GetComponent<PlayerObjectBehaviour>();
+        
     }
 
-    private void OnMouseUp()
+    public void UpdateDeckNumber()
     {
-        new DrawCard(whichPlayer, 1).Fire(UpdateUI);
+        CardsRemaining.text = pob.Player.Deck.Size.ToString();
+    }
+
+    public void DrawNCards(int num)
+    {
+        new DrawCard(pob.Player, num).Fire(UpdateUI);
     }
 
     /// <summary>
@@ -28,9 +34,9 @@ public class DeckObjectBehaviour : MonoBehaviour
         List<Card> cardList = (List<Card>)payload;
         for (int i = 0; i < cardList.Count; i ++)
         {
-            GameObject co = CardObjectBehaviour.Create(cardList.ElementAt(i), whichPlayer);
-            handArea.GetComponent<HandObjectBehaviour>().AddCard(co);
+            GameObject co = CardObjectBehaviour.Create(cardList.ElementAt(i), pob);
+            pob.HandArea.GetComponent<HandObjectBehaviour>().AddCard(co);
         }
-        cardsRemaining.text = Player.P(whichPlayer).Deck.Size.ToString();
+        UpdateDeckNumber();
     }
 }

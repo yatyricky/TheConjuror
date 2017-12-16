@@ -2,22 +2,21 @@
 
 public class DrawCard : GameAction
 {
-    private int player;
+    private Player player;
     private int num;
-    private List<Card> drawn;
 
-    public DrawCard(int player, int num) : base()
+    public DrawCard(Player player, int num) : base()
     {
         this.player = player;
         this.num = num;
-        drawn = new List<Card>();
     }
 
     public override void Fire(UpdateUICallBack callBack)
     {
+        List<Card> drawn = new List<Card>();
         for (int i = 0; i < num; i ++)
         {
-            drawn.Add(Player.P(player).DrawRandom());
+            drawn.Add(player.DrawRandom());
         }
         callBack(drawn);
     }

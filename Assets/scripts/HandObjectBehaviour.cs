@@ -12,18 +12,6 @@ public class HandObjectBehaviour : MonoBehaviour
         cardObjs = new List<GameObject>();
     }
 
-    // Use this for initialization
-    void Start()
-    {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
     private void RerenderCards()
     {
         if (cardObjs.Count > 0)

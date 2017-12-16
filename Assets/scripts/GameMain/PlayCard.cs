@@ -1,18 +1,20 @@
 ﻿public class PlayCard : GameAction
 {
-    private int player;
+    private Player player;
     private Card card;
+    private int slotId;
 
-    public PlayCard(int player, Card card) : base()
+    public PlayCard(Player player, Card card, int slotId) : base()
     {
         this.player = player;
         this.card = card;
+        this.slotId = slotId;
     }
 
     public override void Fire(UpdateUICallBack callBack)
     {
-        Player.P(player).PlayCardFromHand(card);
-        callBack(player);
+        player.PlayCardFromHand(card, slotId);
+        callBack(slotId);
     }
 
 }
