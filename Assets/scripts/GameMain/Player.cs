@@ -9,6 +9,7 @@ public class Player
     private Deck deck = null;
     private List<Card> hand;
     private CardSlot[] cardSlots;
+    private int[] cardSlotsAttacks;
     private List<Card> grave;
     private int health;
     private int mana;
@@ -33,6 +34,7 @@ public class Player
         cardSlots[2] = new CardSlot(Colors.ALL);
         cardSlots[3] = new CardSlot(Colors.GREEN);
         cardSlots[4] = new CardSlot(Colors.RED);
+        cardSlotsAttacks = new int[5];
 
         // HARDCODE
         maxMana = 0;
@@ -43,10 +45,23 @@ public class Player
         InitDeck(deckName);
     }
 
+    internal void RestoreSlotAttackCharges()
+    {
+        cardSlotsAttacks[0] = 1;
+        cardSlotsAttacks[1] = 1;
+        cardSlotsAttacks[2] = 1;
+        cardSlotsAttacks[3] = 1;
+        cardSlotsAttacks[4] = 1;
+    }
+
     internal Attack.AttackResult Attack(Player defender, int cardSlot)
     {
         Attack.AttackResult res = new Attack.AttackResult();
 
+        // reduce slot attack charges by 1
+        cardSlotsAttacks[cardSlot] -= 1;
+
+        // Slots battle
         int attackerPower = GetSlotPower(cardSlot);
         int defenderPower = defender.GetSlotPower(cardSlot);
         List<Card> thisKilled = cardSlots[cardSlot].TakeDamage(defenderPower);
@@ -55,7 +70,32 @@ public class Player
         defenderkilled.ForEach(card => defender.grave.Add(card));
         res.Attacker = thisKilled;
         res.Defender = defenderkilled;
+
+        // inflict damage to player
+        if (attackerPower > defenderPower)
+        {
+            defender.TakeDamage(1);
+        }
+        else if (attackerPower < defenderPower)
+        {
+            TakeDamage(1);
+        }
         return res;
+    }
+
+    private void TakeDamage(int v)
+    {
+        health -= 1;
+    }
+
+    internal bool CanAttackWithSlot(int slotId)
+    {
+        return cardSlotsAttacks[slotId] > 0;
+    }
+
+    internal bool CanPlayCardToSlot(Card cardData, int slotId)
+    {
+        return cardData.Cost <= mana;
     }
 
     internal void TurnAddMana()
@@ -94,6 +134,7 @@ public class Player
                 // TODO playing spells
                 grave.Add(card);
             }
+            mana -= card.Cost;
         }
         else
         {

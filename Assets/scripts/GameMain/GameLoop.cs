@@ -19,6 +19,13 @@ public class GameLoop : MonoBehaviour
         // register events
         RegisterTurnStartEvent(RestoreManaAndAddOne);
         RegisterTurnStartEvent(DrawCards);
+        RegisterTurnStartEvent(RestoreSlotAttackCharges);
+    }
+
+    private void RestoreSlotAttackCharges(GameLoop loop)
+    {
+        PlayerObjectBehaviour pob = board.GetCurrentPlayerObject(CurrentPlayer).GetComponent<PlayerObjectBehaviour>();
+        pob.Player.RestoreSlotAttackCharges();
     }
 
     private void DrawCards(GameLoop loop)

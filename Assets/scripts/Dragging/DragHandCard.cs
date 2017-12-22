@@ -49,14 +49,19 @@ public class DragHandCard : DraggingActions
                 endSlot = h.transform.gameObject;
             }
         }
+        bool playSuccess = false;
         if (endSlot != null)
         {
             // Dragged into a cardslot
             CardObjectBehaviour cob = gameObject.GetComponent<CardObjectBehaviour>();
             CardSlotBehaviour csb = endSlot.GetComponent<CardSlotBehaviour>();
-            new PlayCard(cob.Owner.Player, cob.CardData, csb.SlotId).Fire(UpdateUI);
+            if (cob.Owner.Player.CanPlayCardToSlot(cob.CardData, csb.SlotId))
+            {
+                new PlayCard(cob.Owner.Player, cob.CardData, csb.SlotId).Fire(UpdateUI);
+                playSuccess = true;
+            }
         }
-        else
+        if (!playSuccess)
         {
             // Dragged into somewhere else
             CardObjectBehaviour cob = gameObject.GetComponent<CardObjectBehaviour>();
@@ -65,9 +70,10 @@ public class DragHandCard : DraggingActions
     }
 
     /// <summary>
-    /// 1. Make creatures un draggale
+    /// 1. Make creatures undraggale
     /// 2. Remove CardObject from HandObject
     /// 3. Ease/ re-organize cards in card slot
+    /// 4. Update player mana
     /// </summary>
     /// <param name="payload"></param>
     private void UpdateUI(object payload)
@@ -78,9 +84,11 @@ public class DragHandCard : DraggingActions
         dragabble = false;
         // 2. Remove CardObject from HandObject
         pob.HandArea.GetComponent<HandObjectBehaviour>().RemoveCard(gameObject);
-        // Ease/ re-organize cards in card slot
+        // 3. Ease/ re-organize cards in card slot
         CardSlotBehaviour csb = pob.CardSlots[slot].GetComponent<CardSlotBehaviour>();
         csb.AddCard(gameObject);
+        // 4. update player mana
+        pob.UpdateMana();
     }
 
     public override void OnStartDrag()

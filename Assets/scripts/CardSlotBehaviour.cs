@@ -78,7 +78,7 @@ public class CardSlotBehaviour : MonoBehaviour
     private void OnMouseDown()
     {
         GameLoop loop = GameObject.FindGameObjectWithTag("GameLoop").GetComponent<GameLoop>();
-        if (pob.Player.GetSlotPower(SlotId) > 0 && loop.CurrentPlayer == pob.PlayerId)
+        if (pob.Player.GetSlotPower(SlotId) > 0 && loop.CurrentPlayer == pob.PlayerId && pob.Player.CanAttackWithSlot(SlotId))
         {
             new Attack(pob.Player, pob.GetOpponent().Player, SlotId).Fire(UpdateUI);
         }
@@ -106,6 +106,9 @@ public class CardSlotBehaviour : MonoBehaviour
 
         UpdateCardsPower();
         defenderCsb.UpdateCardsPower();
+
+        pob.UpdateHealth();
+        pob.GetOpponent().UpdateHealth();
     }
 
     private void UpdateCardsPower()
