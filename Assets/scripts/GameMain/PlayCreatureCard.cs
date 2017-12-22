@@ -1,10 +1,10 @@
-﻿public class PlayCard : GameAction
+﻿public class PlayCreatureCard : GameAction
 {
     private Player player;
     private Card card;
     private int slotId;
 
-    public PlayCard(Player player, Card card, int slotId) : base()
+    public PlayCreatureCard(Player player, Card card, int slotId) : base()
     {
         this.player = player;
         this.card = card;
@@ -14,7 +14,12 @@
     public override void Fire(UpdateUICallBack callBack)
     {
         player.PlayCardFromHand(card, slotId);
-        callBack(slotId);
+        Payload data = new Payload
+        {
+            ActionName = GetType().Name,
+            payload = slotId
+        };
+        callBack(data);
     }
 
 }

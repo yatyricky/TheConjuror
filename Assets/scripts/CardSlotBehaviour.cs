@@ -84,9 +84,9 @@ public class CardSlotBehaviour : MonoBehaviour
         }
     }
 
-    public void UpdateUI(object payload)
+    public void UpdateUI(GameAction.Payload payload)
     {
-        Attack.AttackResult aa = (Attack.AttackResult)payload;
+        Attack.AttackResult aa = (Attack.AttackResult)payload.payload;
         
         CardSlotBehaviour defenderCsb = pob.GetOpponent().CardSlots[SlotId].GetComponent<CardSlotBehaviour>();
 

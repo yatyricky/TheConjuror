@@ -15,7 +15,12 @@ public class Attack : GameAction
 
     public override void Fire(UpdateUICallBack callBack)
     {
-        callBack(attacker.Attack(defender, cardSlot));
+        Payload data = new Payload
+        {
+            ActionName = GetType().Name,
+            payload = attacker.Attack(defender, cardSlot)
+        };
+        callBack(data);
     }
 
     public class AttackResult

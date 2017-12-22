@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using DG.Tweening;
+using System.Collections.Generic;
 
 public class DragHandCard : DraggingActions
 {
@@ -57,8 +58,16 @@ public class DragHandCard : DraggingActions
             CardSlotBehaviour csb = endSlot.GetComponent<CardSlotBehaviour>();
             if (cob.Owner.Player.CanPlayCardToSlot(cob.CardData, csb.SlotId))
             {
-                new PlayCard(cob.Owner.Player, cob.CardData, csb.SlotId).Fire(UpdateUI);
-                playSuccess = true;
+                if (cob.CardData.Type == CardTypes.CREATURE)
+                {
+                    new PlayCreatureCard(cob.Owner.Player, cob.CardData, csb.SlotId).Fire(PlayCreatureCardUpdateUI);
+                    playSuccess = true;
+                }
+                if (cob.CardData.Type == CardTypes.SPELL)
+                {
+                    new PlaySpellCard(cob.Owner.Player, cob.CardData).Fire(PlaySpellCardUpdateUI);
+                    playSuccess = true;
+                }
             }
         }
         if (!playSuccess)
@@ -76,10 +85,10 @@ public class DragHandCard : DraggingActions
     /// 4. Update player mana
     /// </summary>
     /// <param name="payload"></param>
-    private void UpdateUI(object payload)
+    private void PlayCreatureCardUpdateUI(GameAction.Payload payload)
     {
         PlayerObjectBehaviour pob = gameObject.GetComponent<CardObjectBehaviour>().Owner;
-        int slot = (int)payload;
+        int slot = (int)payload.payload;
         // 1.Make creatures un draggale
         dragabble = false;
         // 2. Remove CardObject from HandObject
@@ -89,6 +98,37 @@ public class DragHandCard : DraggingActions
         csb.AddCard(gameObject);
         // 4. update player mana
         pob.UpdateMana();
+    }
+
+    /// <summary>
+    /// 1. Make creatures undraggale
+    /// 2. Discard card into graveyard
+    /// 3. Remove CardObject from HandObject
+    /// 4. Update player mana
+    /// 5. Do corresponding UI logic
+    /// </summary>
+    /// <param name="payload"></param>
+    private void PlaySpellCardUpdateUI(GameAction.Payload payload)
+    {
+        PlayerObjectBehaviour pob = gameObject.GetComponent<CardObjectBehaviour>().Owner;
+        // 1.Make creatures un draggale
+        dragabble = false;
+        // 2. Discard card into graveyard
+        CardObjectBehaviour cob = gameObject.GetComponent<CardObjectBehaviour>();
+        cob.OriginPos = new Vector3(7.35f, -4f, -0.1f);
+        gameObject.transform.DOMove(cob.OriginPos, 1f);
+        // 3. Remove CardObject from HandObject
+        pob.HandArea.GetComponent<HandObjectBehaviour>().RemoveCard(gameObject);
+        // 4. update player mana
+        pob.UpdateMana();
+        // 5. Do corresponding UI logic
+        if (payload != null)
+        {
+            if (payload.ActionName == "DrawCard")
+            {
+                new DrawCardView((List<Card>)payload.payload, pob);
+            }
+        }
     }
 
     public override void OnStartDrag()

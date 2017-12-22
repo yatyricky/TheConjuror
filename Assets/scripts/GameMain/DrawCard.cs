@@ -18,6 +18,12 @@ public class DrawCard : GameAction
         {
             drawn.Add(player.DrawRandom());
         }
-        callBack(drawn);
+        Payload payload = new Payload
+        {
+            ActionName = GetType().Name,
+            payload = drawn
+        };
+
+        callBack(payload);
     }
 }

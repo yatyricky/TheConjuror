@@ -12,6 +12,7 @@ public class Player
     private int[] cardSlotsAttacks;
     private List<Card> grave;
     private int health;
+
     private int mana;
     private int maxHealth;
     private int maxMana;
@@ -129,9 +130,20 @@ public class Player
             {
                 cardSlots[slotId].Add(card);
             }
-            else
+            mana -= card.Cost;
+        }
+        else
+        {
+            throw new Exception("Playing card that not in hand");
+        }
+    }
+
+    internal void PlaySpellCardFromHand(Card card)
+    {
+        if (hand.Remove(card))
+        {
+            if (card.Type.Equals(CardTypes.SPELL))
             {
-                // TODO playing spells
                 grave.Add(card);
             }
             mana -= card.Cost;

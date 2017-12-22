@@ -25,18 +25,8 @@ public class DeckObjectBehaviour : MonoBehaviour
         new DrawCard(pob.Player, num).Fire(UpdateUI);
     }
 
-    /// <summary>
-    /// Called when draw card is done
-    /// </summary>
-    /// <param name="payload">Returned list of drawn cards</param>
-    public void UpdateUI(object payload)
+    private void UpdateUI(GameAction.Payload payload)
     {
-        List<Card> cardList = (List<Card>)payload;
-        for (int i = 0; i < cardList.Count; i ++)
-        {
-            GameObject co = CardObjectBehaviour.Create(cardList.ElementAt(i), pob);
-            pob.HandArea.GetComponent<HandObjectBehaviour>().AddCard(co);
-        }
-        UpdateDeckNumber();
+        new DrawCardView((List<Card>)payload.payload, pob);
     }
 }
