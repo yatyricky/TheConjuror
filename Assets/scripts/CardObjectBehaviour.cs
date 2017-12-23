@@ -35,15 +35,15 @@ public class CardObjectBehaviour : MonoBehaviour
         CardObjectBehaviour cob = co.GetComponent<CardObjectBehaviour>();
 
         // card visual
-        cob.CardImage.sprite = IMG2Sprite.LoadNewSprite(Application.dataPath + "/sprites/card_images/" + cardData.Id + ".png");
+        cob.CardImage.sprite = Resources.Load<Sprite>("sprites/card_images/" + cardData.Id);
         cob.CardName.text = cardData.Name;
-        cob.CardClass.sprite = IMG2Sprite.LoadNewSprite(Application.dataPath + "/sprites/card_ui/frame_" + cardData.Color + ".png");
-        cob.CardType.sprite = IMG2Sprite.LoadNewSprite(Application.dataPath + "/sprites/card_ui/type_" + cardData.Type + ".png");
+        cob.CardClass.sprite = Resources.Load<Sprite>("sprites/card_ui/frame_" + cardData.Color);
+        cob.CardType.sprite = Resources.Load<Sprite>("sprites/card_ui/type_" + cardData.Type);
         cob.CardPower.text = cardData.Power.ToString();
         cob.CardDescription.text = cardData.Description.Replace("|n", "\n");
         cob.CardCostNumber.text = cardData.Cost.ToString();
-        cob.CardCostImage.sprite = IMG2Sprite.LoadNewSprite(Application.dataPath + "/sprites/card_ui/mana_" + cardData.Color + ".png");
-        Sprite powerFrame = IMG2Sprite.LoadNewSprite(Application.dataPath + "/sprites/card_ui/power_" + cardData.Color + ".png");
+        cob.CardCostImage.sprite = Resources.Load<Sprite>("sprites/card_ui/mana_" + cardData.Color);
+        Sprite powerFrame = Resources.Load<Sprite>("sprites/card_ui/power_" + cardData.Color);
         cob.CardTypeFrame.sprite = powerFrame;
         cob.CardPowerFrame.sprite = powerFrame;
 
