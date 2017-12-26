@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.IO;
 
 public class DataManager : MonoBehaviour
 {
-    public TextAsset allCards;
-    public TextAsset decks;
-
     private Dictionary<string, List<DeckData>> deckBase;
     public Dictionary<string, List<DeckData>> DeckBase { get { return deckBase; } }
     public class DeckData
@@ -47,74 +45,75 @@ public class DataManager : MonoBehaviour
     private void Awake()
     {
         // parse cards
-        string[,] cardsCSV = CSVReader.SplitCsvGrid(allCards.text);
-        cardBase = new Dictionary<int, CardData>();
+        string bulkText = Resources.Load<TextAsset>("data/all_cards").text;
         int idIndex = 0, nameIndex = 0, colorIndex = 0, typeIndex = 0, costIndex = 0, powerIndex = 0, descIndex = 0;
-        for (int i = 0; i < cardsCSV.GetLength(0); i++)
+        StringReader reader = new StringReader(bulkText);
+        string line = reader.ReadLine();
+        string[] tokens = line.Split(',');
+        for (int i = 0; i < tokens.Length; i ++)
         {
-            if (cardsCSV[i, 0] != null)
-            {
-                if (cardsCSV[i, 0].Equals("id"))
-                    idIndex = i;
-                if (cardsCSV[i, 0].Equals("name"))
-                    nameIndex = i;
-                if (cardsCSV[i, 0].Equals("color"))
-                    colorIndex = i;
-                if (cardsCSV[i, 0].Equals("type"))
-                    typeIndex = i;
-                if (cardsCSV[i, 0].Equals("cost"))
-                    costIndex = i;
-                if (cardsCSV[i, 0].Equals("power"))
-                    powerIndex = i;
-                if (cardsCSV[i, 0].Equals("description"))
-                    descIndex = i;
-            }
+            if (tokens[i].Equals("id"))
+                idIndex = i;
+            if (tokens[i].Equals("name"))
+                nameIndex = i;
+            if (tokens[i].Equals("color"))
+                colorIndex = i;
+            if (tokens[i].Equals("type"))
+                typeIndex = i;
+            if (tokens[i].Equals("cost"))
+                costIndex = i;
+            if (tokens[i].Equals("power"))
+                powerIndex = i;
+            if (tokens[i].Equals("description"))
+                descIndex = i;
         }
-        for (int i = 1; i < cardsCSV.GetLength(1); i++)
+        cardBase = new Dictionary<int, CardData>();
+        while ((line = reader.ReadLine()) != null)
         {
-            if (cardsCSV[0, i] != null)
-            {
-                int id = -1;
-                if (!System.Int32.TryParse(cardsCSV[idIndex, i], out id))
-                    throw new Exception("Bad csv format, id is not number");
-                string name = cardsCSV[nameIndex, i];
-                string color = cardsCSV[colorIndex, i];
-                string type = cardsCSV[typeIndex, i];
-                int cost = -1;
-                if (!System.Int32.TryParse(cardsCSV[costIndex, i], out cost))
-                    throw new Exception("Bad csv format, cost is not number");
-                string description = cardsCSV[descIndex, i];
-                int power = 0;
-                System.Int32.TryParse(cardsCSV[powerIndex, i], out power);
+            tokens = line.Split(',');
+            if (tokens[1] == "")
+                break;
 
-                CardData cardData = new CardData(name, color, type, cost, description, power);
-                cardBase.Add(id, cardData);
-            }
+            int id = -1;
+            if (!System.Int32.TryParse(tokens[idIndex], out id))
+                throw new Exception("Bad csv format, id is not number");
+            string name = tokens[nameIndex];
+            string color = tokens[colorIndex];
+            string type = tokens[typeIndex];
+            int cost = -1;
+            if (!System.Int32.TryParse(tokens[costIndex], out cost))
+                throw new Exception("Bad csv format, cost is not number");
+            string description = tokens[descIndex];
+            int power = 0;
+            System.Int32.TryParse(tokens[powerIndex], out power);
+
+            CardData cardData = new CardData(name, color, type, cost, description, power);
+            cardBase.Add(id, cardData);
         }
 
         // parse deck prototypes
-        string[,] decksCSV = CSVReader.SplitCsvGrid(decks.text);
+        bulkText = Resources.Load<TextAsset>("data/decks").text;
         deckBase = new Dictionary<string, List<DeckData>>();
         List<DeckData> aDeck = null;
-        for (int i = 0; i < decksCSV.GetLength(1); i++)
+        reader = new StringReader(bulkText);
+        while ((line = reader.ReadLine()) != null)
         {
-            if (decksCSV[0, i] != null)
+            tokens = line.Split(',');
+
+            if (tokens[0][0] != '1')
             {
-                if (decksCSV[0, i][0] != '1')
-                {
-                    aDeck = new List<DeckData>();
-                    deckBase.Add(decksCSV[0, i], aDeck);
-                }
-                else
-                {
-                    int n = -1;
-                    if (!System.Int32.TryParse(decksCSV[3, i], out n))
-                        throw new Exception("Bad csv format, deck num is not number");
-                    int id = -1;
-                    if (!System.Int32.TryParse(decksCSV[0, i], out id))
-                        throw new Exception("Bad csv format, deck id is not number");
-                    aDeck.Add(new DeckData(id, n));
-                }
+                aDeck = new List<DeckData>();
+                deckBase.Add(tokens[0], aDeck);
+            }
+            else
+            {
+                int n = -1;
+                if (!System.Int32.TryParse(tokens[3], out n))
+                    throw new Exception("Bad csv format, deck num is not number");
+                int id = -1;
+                if (!System.Int32.TryParse(tokens[0], out id))
+                    throw new Exception("Bad csv format, deck id is not number");
+                aDeck.Add(new DeckData(id, n));
             }
         }
     }
