@@ -27,5 +27,7 @@ public class Attack : GameAction
     {
         public List<Card> Attacker;
         public List<Card> Defender;
+        public int AttackerSlotId;
+        public int DefenderSlotId;
     }
 }

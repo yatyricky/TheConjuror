@@ -13,3 +13,9 @@ public class CardTypes
     public static string SPELL = "spell";
     public static string ENCHANTMENT = "enchantment";
 }
+
+public class UIState
+{
+    public static int ACTION = 0;
+    public static int BATTLING = 100;
+}

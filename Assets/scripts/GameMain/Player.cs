@@ -71,6 +71,8 @@ public class Player
         defenderkilled.ForEach(card => defender.grave.Add(card));
         res.Attacker = thisKilled;
         res.Defender = defenderkilled;
+        res.AttackerSlotId = cardSlot;
+        res.DefenderSlotId = cardSlot;
 
         // inflict damage to player
         if (attackerPower > defenderPower)

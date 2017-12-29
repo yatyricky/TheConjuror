@@ -8,6 +8,8 @@ TagManager:
   - CardSlot
   - GameLoop
   - ThePlayer
+  - BattleAttacker
+  - BattleDefender
   layers:
   - Default
   - TransparentFX
