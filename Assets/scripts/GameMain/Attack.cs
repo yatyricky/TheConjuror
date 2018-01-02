@@ -29,5 +29,17 @@ public class Attack : GameAction
         public List<Card> Defender;
         public int AttackerSlotId;
         public int DefenderSlotId;
+        public List<Tuple<int, int>> AttackerModifiers;
+        public List<Tuple<int, int>> DefenderModifiers;
+
+        public int SumModifiers(List<Tuple<int, int>> list)
+        {
+            int sum = 0;
+            foreach(Tuple<int, int> entry in list)
+            {
+                sum += entry.Value1;
+            }
+            return sum;
+        }
     }
 }

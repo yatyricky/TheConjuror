@@ -10,6 +10,7 @@ public class PlayerObjectBehaviour : MonoBehaviour
     public GameObject HandArea;
     public GameObject Deck;
     public GameObject[] CardSlots;
+    public GameObject Grave;
 
     private Player player;
 

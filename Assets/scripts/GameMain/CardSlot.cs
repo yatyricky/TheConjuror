@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using UnityEngine;
 
 public class CardSlot
 {
@@ -61,5 +64,35 @@ public class CardSlot
             }
         }
         return killed;
+    }
+
+    internal List<Tuple<int, int>> GetModifiers(bool attacker)
+    {
+        List<Tuple<int, int>> res = new List<Tuple<int, int>>();
+        for (int i = 0; i < cards.Count; i ++)
+        {
+            Card item = cards.ElementAt(i);
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            Type type = null;
+            try
+            {
+                type = assembly.GetTypes().First(t => t.Name == "Card" + item.Id);
+            }
+            catch (InvalidOperationException ioe)
+            {
+                Debug.LogWarning(ioe);
+            }
+            if (type != null)
+            {
+                CardAbility obj = (CardAbility)Activator.CreateInstance(type);
+                obj.Card = item;
+                int mod = obj.GetAttackModifier(attacker);
+                if (mod != 0)
+                {
+                    res.Add(new Tuple<int, int>(item.Id, mod));
+                }
+            }
+        }
+        return res;
     }
 }

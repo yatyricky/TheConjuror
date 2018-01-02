@@ -29,6 +29,8 @@ public class CardObjectBehaviour : MonoBehaviour
     public PlayerObjectBehaviour Owner {get { return owner; }set { owner = value; }}
     public float Order {get { return order; }set { order = value; }}
 
+    public Vector3 TempPos;
+
     public static GameObject Create(Card cardData, PlayerObjectBehaviour player)
     {
         GameObject co = Instantiate(Resources.Load("prefabs/CardObject")) as GameObject;
@@ -71,7 +73,8 @@ public class CardObjectBehaviour : MonoBehaviour
 
     private void OnMouseOver()
     {
-        if (!mouseHovering && !isPreviewing)
+        BoardBehaviour bb = GameObject.FindGameObjectWithTag("GameController").GetComponent<BoardBehaviour>();
+        if (!mouseHovering && !isPreviewing && bb.GetUIState() != UIState.BATTLING)
         {
             gameObject.transform.position = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y, -2f);
             mouseHovering = true;

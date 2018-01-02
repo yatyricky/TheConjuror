@@ -61,10 +61,12 @@ public class Player
 
         // reduce slot attack charges by 1
         cardSlotsAttacks[cardSlot] -= 1;
-
+        // On Attack
+        res.AttackerModifiers = cardSlots[cardSlot].GetModifiers(true);
+        res.DefenderModifiers = defender.cardSlots[cardSlot].GetModifiers(false);
         // Slots battle
-        int attackerPower = GetSlotPower(cardSlot);
-        int defenderPower = defender.GetSlotPower(cardSlot);
+        int attackerPower = GetSlotPower(cardSlot) + res.SumModifiers(res.AttackerModifiers);
+        int defenderPower = defender.GetSlotPower(cardSlot) + +res.SumModifiers(res.DefenderModifiers);
         List<Card> thisKilled = cardSlots[cardSlot].TakeDamage(defenderPower);
         List<Card> defenderkilled = defender.cardSlots[cardSlot].TakeDamage(attackerPower);
         thisKilled.ForEach(card => grave.Add(card));
@@ -88,7 +90,7 @@ public class Player
 
     private void TakeDamage(int v)
     {
-        health -= 1;
+        health -= v;
     }
 
     internal bool CanAttackWithSlot(int slotId)

@@ -28,4 +28,9 @@ public class BoardBehaviour : MonoBehaviour
     {
         uiState = state;
     }
+
+    internal int GetUIState()
+    {
+        return uiState;
+    }
 }
