@@ -145,6 +145,12 @@ public class CardSlotBehaviour : MonoBehaviour
                     // pop out active card
                     s.Insert(time, item.transform.DOMove(new Vector3(itemCOB.TempPos.x, itemCOB.TempPos.y, itemCOB.TempPos.z - 1f), GameConfig.BATTLE_CARD_EFFECT_SCALE_TIME));
                     s.Insert(time, item.transform.DOScale(GameConfig.BATTLE_CARD_EFFECT_SCALE, GameConfig.BATTLE_CARD_EFFECT_SCALE_TIME));
+                    s.InsertCallback(time, () =>
+                    {
+                        GameObject co = Instantiate(Resources.Load("prefabs/CardEffectParticle")) as GameObject;
+                        co.transform.position = new Vector3(item.transform.position.x, item.transform.position.y, -5f);
+                        co.transform.SetParent(item.transform);
+                    });
                     // show effect values
                     GameObject buffLabel = attackerGO.transform.Find("Buff").gameObject;
                     GameObject debuffLabel = attackerGO.transform.Find("Debuff").gameObject;
