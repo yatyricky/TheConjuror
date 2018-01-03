@@ -22,6 +22,7 @@ public class CardObjectBehaviour : MonoBehaviour
     private Card cardData;
     private PlayerObjectBehaviour owner;
     private bool mouseHovering;
+    private bool canMouseHover;
     private bool isPreviewing;
 
     public Vector3 OriginPos {get{ return originPos; } set { originPos = value;}}
@@ -69,12 +70,13 @@ public class CardObjectBehaviour : MonoBehaviour
     private void Awake()
     {
         mouseHovering = false;
+        SetMouseHovering(true);
     }
 
     private void OnMouseOver()
     {
         BoardBehaviour bb = GameObject.FindGameObjectWithTag("GameController").GetComponent<BoardBehaviour>();
-        if (!mouseHovering && !isPreviewing && bb.GetUIState() != UIState.BATTLING)
+        if (!mouseHovering && !isPreviewing && bb.GetUIState() != UIState.BATTLING && canMouseHover)
         {
             gameObject.transform.position = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y, -2f);
             mouseHovering = true;
@@ -96,11 +98,23 @@ public class CardObjectBehaviour : MonoBehaviour
 
     private void OnMouseExit()
     {
-        if (mouseHovering && !isPreviewing)
+        if (mouseHovering && !isPreviewing && canMouseHover)
         {
             gameObject.transform.position = originPos;
             mouseHovering = false;
         }
+    }
+
+    public void AddEffectParticle()
+    {
+        GameObject co = Instantiate(Resources.Load("prefabs/CardEffectParticle")) as GameObject;
+        co.transform.position = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y, -5f);
+        co.transform.SetParent(gameObject.transform);
+    }
+
+    public void SetMouseHovering(bool canMouseHover)
+    {
+        this.canMouseHover = canMouseHover;
     }
 
 }

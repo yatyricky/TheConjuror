@@ -6,4 +6,9 @@
     {
         return 0;
     }
+
+    internal virtual void DoAction(Player player, GameAction.UpdateUICallBack callBack)
+    {
+
+    }
 }

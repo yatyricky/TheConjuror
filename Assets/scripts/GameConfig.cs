@@ -17,4 +17,9 @@
     public static float BATTLE_CARD_DEATH_FLY_TIME = 1f;
     public static float BATTLE_SLASH_TIME = 0.13f;
     public static float BATTLE_AFTER_DAMAGE_INTV = 0.7f;
+
+    public static float SPELL_CARD_FLY_TIME = 0.1f;
+    public static float SPELL_CARD_SCALE = 2f;
+    public static float SPELL_CARD_DISPLAY_TIME = 1.5f;
+    public static float SPELL_CARD_UI_EFFECT_TIME = 1.5f;
 }

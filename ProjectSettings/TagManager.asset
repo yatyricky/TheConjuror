@@ -10,6 +10,7 @@ TagManager:
   - ThePlayer
   - BattleAttacker
   - BattleDefender
+  - BattleNeutral
   layers:
   - Default
   - TransparentFX

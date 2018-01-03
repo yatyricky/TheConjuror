@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Linq;
+using System.Reflection;
+using UnityEngine;
 
 public class PlaySpellCard : GameAction
 {
@@ -14,9 +17,22 @@ public class PlaySpellCard : GameAction
     public override void Fire(UpdateUICallBack callBack)
     {
         player.PlaySpellCardFromHand(cardData);
-        if (cardData.Id == 1000028)
+
+        Assembly assembly = Assembly.GetExecutingAssembly();
+        Type type = null;
+        try
         {
-            new DrawCard(player, 1).Fire(callBack);
+            type = assembly.GetTypes().First(t => t.Name == "Card" + cardData.Id);
+        }
+        catch (InvalidOperationException ioe)
+        {
+            Debug.LogWarning(ioe);
+        }
+        if (type != null)
+        {
+            CardAbility obj = (CardAbility)Activator.CreateInstance(type);
+            obj.Card = cardData;
+            obj.DoAction(player, callBack);
         }
         else
         {

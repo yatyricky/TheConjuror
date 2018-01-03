@@ -102,33 +102,59 @@ public class DragHandCard : DraggingActions
 
     /// <summary>
     /// 1. Make creatures undraggale
-    /// 2. Discard card into graveyard
-    /// 3. Remove CardObject from HandObject
-    /// 4. Update player mana
-    /// 5. Do corresponding UI logic
+    /// 1.1. Remove CardObject from HandObject
+    /// 2. Play effects
+    /// 3. Move to battle field neutral position
+    /// 4. Add effect to the card
+    /// 5. Update player mana
+    /// 6. Do corresponding UI logic
+    /// 7. Discard card into graveyard
     /// </summary>
     /// <param name="payload"></param>
     private void PlaySpellCardUpdateUI(GameAction.Payload payload)
     {
-        PlayerObjectBehaviour pob = gameObject.GetComponent<CardObjectBehaviour>().Owner;
-        // 1.Make creatures un draggale
-        dragabble = false;
-        // 2. Discard card into graveyard
         CardObjectBehaviour cob = gameObject.GetComponent<CardObjectBehaviour>();
-        cob.OriginPos = new Vector3(7.35f, -4f, -0.1f);
-        gameObject.transform.DOMove(cob.OriginPos, 1f);
-        // 3. Remove CardObject from HandObject
+        PlayerObjectBehaviour pob = cob.Owner;
+        // 1. Make creatures undraggale
+        dragabble = false;
+        cob.SetMouseHovering(false);
+        // 1.1. Remove CardObject from HandObject
         pob.HandArea.GetComponent<HandObjectBehaviour>().RemoveCard(gameObject);
-        // 4. update player mana
+        // 2. Play effects
+        Sequence s = DOTween.Sequence();
+        float timeNode = 0f;
+        // 3. Move to battle field neutral position
+        Vector3 spellEffectPos = GameObject.FindGameObjectWithTag("BattleNeutral").transform.position;
+        s.Insert(timeNode, gameObject.transform.DOMove(new Vector3(spellEffectPos.x, spellEffectPos.y, -3f), GameConfig.SPELL_CARD_FLY_TIME));
+        s.Insert(timeNode, gameObject.transform.DOScale(GameConfig.SPELL_CARD_SCALE, GameConfig.SPELL_CARD_FLY_TIME));
+        // 4. Add effect to the card
+        cob.AddEffectParticle();
+        // 5. Update player mana
         pob.UpdateMana();
-        // 5. Do corresponding UI logic
-        if (payload != null)
+
+        timeNode += GameConfig.SPELL_CARD_DISPLAY_TIME + GameConfig.SPELL_CARD_FLY_TIME;
+        // 6. Do corresponding UI logic
+        s.InsertCallback(timeNode, () =>
         {
-            if (payload.ActionName == "DrawCard")
+            if (payload != null)
             {
-                new DrawCardView((List<Card>)payload.payload, pob);
+                if (payload.ActionName == "DrawCard")
+                {
+                    new DrawCardView((List<Card>)payload.payload, pob);
+                }
             }
-        }
+        });
+
+        timeNode += GameConfig.SPELL_CARD_UI_EFFECT_TIME;
+        
+        s.InsertCallback(timeNode, () =>
+        {
+            // 7. Discard card into graveyard
+            cob.OriginPos = pob.Grave.transform.position;
+            gameObject.transform.DOMove(cob.OriginPos, GameConfig.BATTLE_CARD_DEATH_FLY_TIME);
+            gameObject.transform.DOScale(1.0f, GameConfig.BATTLE_CARD_DEATH_FLY_TIME);
+            cob.SetMouseHovering(true);
+        });
     }
 
     public override void OnStartDrag()
