@@ -28,8 +28,12 @@ public class GameLoop : MonoBehaviour
     private void CheckBuffsEndTurn(GameLoop loop)
     {
         PlayerObjectBehaviour pob = board.GetCurrentPlayerObject(CurrentPlayer).GetComponent<PlayerObjectBehaviour>();
-        board.PlayerA.GetComponent<PlayerObjectBehaviour>().Player.CheckBuffsEndTurn(pob.Player);
-        board.PlayerB.GetComponent<PlayerObjectBehaviour>().Player.CheckBuffsEndTurn(pob.Player);
+        PlayerObjectBehaviour pobA = board.PlayerA.GetComponent<PlayerObjectBehaviour>();
+        PlayerObjectBehaviour pobB = board.PlayerB.GetComponent<PlayerObjectBehaviour>();
+        pobA.Player.CheckBuffsEndTurn(pob.Player);
+        pobB.Player.CheckBuffsEndTurn(pob.Player);
+        pobA.UpdateAll();
+        pobB.UpdateAll();
     }
 
     private void RestoreSlotAttackCharges(GameLoop loop)

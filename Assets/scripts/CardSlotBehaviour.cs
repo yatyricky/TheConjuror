@@ -163,7 +163,7 @@ public class CardSlotBehaviour : MonoBehaviour
                     s.Insert(time, item.transform.DOScale(GameConfig.BATTLE_CARD_EFFECT_SCALE, GameConfig.BATTLE_CARD_EFFECT_SCALE_TIME));
                     s.InsertCallback(time, () =>
                     {
-                        gameObject.GetComponent<CardObjectBehaviour>().AddEffectParticle();
+                        itemCOB.AddEffectParticle();
                     });
                     // show effect values
                     GameObject buffLabel = attackerGO.transform.Find("Buff").gameObject;
