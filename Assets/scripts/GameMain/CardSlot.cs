@@ -29,9 +29,40 @@ public class CardSlot
         int sum = 0;
         for (int i = 0; i < cards.Count; i ++)
         {
-            sum += cards.ElementAt(i).Power;
+            Card item = cards.ElementAt(i);
+            if (item.CanBattle())
+            {
+                sum += item.Power;
+            }
         }
         return sum;
+    }
+
+    private Card GetLowestPower()
+    {
+        if (cards.Count > 0)
+        {
+            Card ret = null;
+            int min = 9999;
+            for(int i = 0; i < cards.Count; i ++)
+            {
+                Card current = cards.ElementAt(i);
+                if (current.CanBattle())
+                {
+                    int power = current.Power;
+                    if (power < min)
+                    {
+                        min = power;
+                        ret = current;
+                    }
+                }
+            }
+            return ret;
+        }
+        else
+        {
+            return null;
+        }
     }
 
     internal List<Card> TakeDamage(int num)
@@ -39,31 +70,42 @@ public class CardSlot
         List<Card> killed = new List<Card>();
         if (cards.Count > 0)
         {
-            cards = cards.OrderBy(card => card.Power).ToList();
-
-            int index = 0;
-            while (num > 0 && index < cards.Count)
+            bool exhausted = false;
+            while (num > 0 && !exhausted)
             {
-                Card current = cards.ElementAt(index);
-                if (current.Power > num)
+                Card current = GetLowestPower();
+                if (current == null)
                 {
-                    // aborbed the damage
-                    current.Power -= num;
-                    num = 0;
+                    exhausted = true;
                 }
                 else
                 {
-                    // killed by this damage
-                    num -= current.Power;
-                    current.Power = 0;
-                    cards.Remove(current);
-                    killed.Add(current);
-                    index--;
+                    if (current.Power > num)
+                    {
+                        // aborbed the damage
+                        current.Power -= num;
+                        num = 0;
+                    }
+                    else
+                    {
+                        // killed by this damage
+                        num -= current.Power;
+                        current.Power = 0;
+                        cards.Remove(current);
+                        killed.Add(current);
+                    }
                 }
-                index++;
             }
         }
         return killed;
+    }
+
+    internal void CheckBuffsEndTurn(Player caster)
+    {
+        foreach(Card card in cards)
+        {
+            card.CheckBuffsEndTurn(caster);
+        }
     }
 
     internal List<Tuple<int, int>> GetModifiers(bool attacker)
@@ -72,24 +114,27 @@ public class CardSlot
         for (int i = 0; i < cards.Count; i ++)
         {
             Card item = cards.ElementAt(i);
-            Assembly assembly = Assembly.GetExecutingAssembly();
-            Type type = null;
-            try
+            if (item.CanBattle())
             {
-                type = assembly.GetTypes().First(t => t.Name == "Card" + item.Id);
-            }
-            catch (InvalidOperationException ioe)
-            {
-                Debug.LogWarning(ioe);
-            }
-            if (type != null)
-            {
-                CardAbility obj = (CardAbility)Activator.CreateInstance(type);
-                obj.Card = item;
-                int mod = obj.GetAttackModifier(attacker);
-                if (mod != 0)
+                Assembly assembly = Assembly.GetExecutingAssembly();
+                Type type = null;
+                try
                 {
-                    res.Add(new Tuple<int, int>(item.Id, mod));
+                    type = assembly.GetTypes().First(t => t.Name == "Card" + item.Id);
+                }
+                catch (InvalidOperationException ioe)
+                {
+                    Debug.LogWarning(ioe);
+                }
+                if (type != null)
+                {
+                    CardAbility obj = (CardAbility)Activator.CreateInstance(type);
+                    obj.Card = item;
+                    int mod = obj.GetAttackModifier(attacker);
+                    if (mod != 0)
+                    {
+                        res.Add(new Tuple<int, int>(item.Id, mod));
+                    }
                 }
             }
         }

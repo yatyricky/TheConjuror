@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class GameLoop : MonoBehaviour
 {
@@ -20,6 +21,15 @@ public class GameLoop : MonoBehaviour
         RegisterTurnStartEvent(RestoreManaAndAddOne);
         RegisterTurnStartEvent(DrawCards);
         RegisterTurnStartEvent(RestoreSlotAttackCharges);
+
+        RegisterTurnEndEvent(CheckBuffsEndTurn);
+    }
+
+    private void CheckBuffsEndTurn(GameLoop loop)
+    {
+        PlayerObjectBehaviour pob = board.GetCurrentPlayerObject(CurrentPlayer).GetComponent<PlayerObjectBehaviour>();
+        board.PlayerA.GetComponent<PlayerObjectBehaviour>().Player.CheckBuffsEndTurn(pob.Player);
+        board.PlayerB.GetComponent<PlayerObjectBehaviour>().Player.CheckBuffsEndTurn(pob.Player);
     }
 
     private void RestoreSlotAttackCharges(GameLoop loop)
@@ -52,6 +62,7 @@ public class GameLoop : MonoBehaviour
 
     public void EndTurn()
     {
+        TurnEndEvents(this);
         if (currentTurn == -1)
         {
             GameStart();
@@ -88,6 +99,13 @@ public class GameLoop : MonoBehaviour
     public void RegisterTurnStartEvent(TurnStartCallBack callBack)
     {
         TurnStartEvents += callBack;
+    }
+
+    public delegate void TurnEndCallBack(GameLoop loop);
+    private event TurnEndCallBack TurnEndEvents;
+    public void RegisterTurnEndEvent(TurnEndCallBack callBack)
+    {
+        TurnEndEvents += callBack;
     }
 
     public static GameObject FindParentWithTag(GameObject childObject, string tag)

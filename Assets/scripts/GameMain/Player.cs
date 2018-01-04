@@ -46,6 +46,14 @@ public class Player
         InitDeck(deckName);
     }
 
+    internal void CheckBuffsEndTurn(Player caster)
+    {
+        for (int i = 0; i < cardSlots.Length; i ++)
+        {
+            cardSlots[i].CheckBuffsEndTurn(caster);
+        }
+    }
+
     internal void RestoreSlotAttackCharges()
     {
         cardSlotsAttacks[0] = 1;

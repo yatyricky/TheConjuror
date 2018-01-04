@@ -27,6 +27,10 @@ public class DeckObjectBehaviour : MonoBehaviour
 
     private void UpdateUI(GameAction.Payload payload)
     {
-        new DrawCardView((List<Card>)payload.payload, pob);
+        new DrawCardView
+        {
+            Payload = payload.payload,
+            POB = pob
+        }.DoAction();
     }
 }

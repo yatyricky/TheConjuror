@@ -58,6 +58,7 @@ public class CardSlotBehaviour : MonoBehaviour
     internal void AddCard(GameObject co)
     {
         cardObjs.Add(co);
+        co.GetComponent<CardObjectBehaviour>().State = CardState.SLOT;
         RerenderCards();
         UpdatePower();
     }
@@ -78,11 +79,16 @@ public class CardSlotBehaviour : MonoBehaviour
 
     private void OnMouseDown()
     {
-        GameLoop loop = GameObject.FindGameObjectWithTag("GameLoop").GetComponent<GameLoop>();
-        if (pob.Player.GetSlotPower(SlotId) > 0 && loop.CurrentPlayer == pob.PlayerId && pob.Player.CanAttackWithSlot(SlotId))
+        BoardBehaviour bb = BoardBehaviour.GetInstance();
+        if (bb.GetUIState() != UIState.TARGETING)
         {
-            new Attack(pob.Player, pob.GetOpponent().Player, SlotId).Fire(UpdateUI);
+            GameLoop loop = GameObject.FindGameObjectWithTag("GameLoop").GetComponent<GameLoop>();
+            if (pob.Player.GetSlotPower(SlotId) > 0 && loop.CurrentPlayer == pob.PlayerId && pob.Player.CanAttackWithSlot(SlotId))
+            {
+                new Attack(pob.Player, pob.GetOpponent().Player, SlotId).Fire(UpdateUI);
+            }
         }
+        
     }
 
     public void UpdateUI(GameAction.Payload payload)
@@ -98,6 +104,8 @@ public class CardSlotBehaviour : MonoBehaviour
         float endTimeNode = 0f;
 
         // To battle position
+        int indexCountA = 0;
+        int indexCountB = 0;
         GameObject attackerGO = GameObject.FindGameObjectWithTag("BattleAttacker");
         GameObject defenderGO = GameObject.FindGameObjectWithTag("BattleDefender");
         Vector3 attackerAnchor = attackerGO.transform.position;
@@ -107,22 +115,30 @@ public class CardSlotBehaviour : MonoBehaviour
         for (int i = 0; i < csbA.cardObjs.Count; i++)
         {
             GameObject item = csbA.cardObjs.ElementAt(i);
-            float time = GameConfig.BATTLE_CARD_INTERVAL * i;
-            item.GetComponent<CardObjectBehaviour>().TempPos = attackerAnchor;
-            s.Insert(time, item.transform.DOMove(attackerAnchor, GameConfig.BATTLE_CARD_FLY_TIME).SetEase(Ease.OutCubic));
-            s.Insert(time, item.transform.DOScale(GameConfig.BATTLE_CARD_SCALE, GameConfig.BATTLE_CARD_SCALE_TIME));
-            attackerAnchor.x += GameConfig.BATTLE_CARD_SPACING;
-            attackerAnchor.z -= 0.1f;
+            if (item.GetComponent<CardObjectBehaviour>().CanBattle())
+            {
+                float time = GameConfig.BATTLE_CARD_INTERVAL * i;
+                item.GetComponent<CardObjectBehaviour>().TempPos = attackerAnchor;
+                s.Insert(time, item.transform.DOMove(attackerAnchor, GameConfig.BATTLE_CARD_FLY_TIME).SetEase(Ease.OutCubic));
+                s.Insert(time, item.transform.DOScale(GameConfig.BATTLE_CARD_SCALE, GameConfig.BATTLE_CARD_SCALE_TIME));
+                attackerAnchor.x += GameConfig.BATTLE_CARD_SPACING;
+                attackerAnchor.z -= 0.1f;
+                indexCountA++;
+            }
         }
         for (int i = 0; i < csbB.cardObjs.Count; i++)
         {
             GameObject item = csbB.cardObjs.ElementAt(i);
-            float time = GameConfig.BATTLE_CARD_INTERVAL * i;
-            item.GetComponent<CardObjectBehaviour>().TempPos = defenderAnchor;
-            s.Insert(time, item.transform.DOMove(defenderAnchor, GameConfig.BATTLE_CARD_FLY_TIME).SetEase(Ease.OutCubic));
-            s.Insert(time, item.transform.DOScale(GameConfig.BATTLE_CARD_SCALE, GameConfig.BATTLE_CARD_SCALE_TIME));
-            defenderAnchor.x -= GameConfig.BATTLE_CARD_SPACING;
-            defenderAnchor.z -= 0.1f;
+            if (item.GetComponent<CardObjectBehaviour>().CanBattle())
+            {
+                float time = GameConfig.BATTLE_CARD_INTERVAL * i;
+                item.GetComponent<CardObjectBehaviour>().TempPos = defenderAnchor;
+                s.Insert(time, item.transform.DOMove(defenderAnchor, GameConfig.BATTLE_CARD_FLY_TIME).SetEase(Ease.OutCubic));
+                s.Insert(time, item.transform.DOScale(GameConfig.BATTLE_CARD_SCALE, GameConfig.BATTLE_CARD_SCALE_TIME));
+                defenderAnchor.x -= GameConfig.BATTLE_CARD_SPACING;
+                defenderAnchor.z -= 0.1f;
+                indexCountB++;
+            }
         }
         endTimeNode = Math.Max(csbA.cardObjs.Count, csbB.cardObjs.Count) * GameConfig.BATTLE_CARD_INTERVAL;
 
@@ -344,6 +360,7 @@ public class CardSlotBehaviour : MonoBehaviour
         cardObjs.Remove(co);
         CardObjectBehaviour cob = co.GetComponent<CardObjectBehaviour>();
         cob.OriginPos = pob.Grave.transform.position;
+        cob.State = CardState.GRAVE;
         s.Insert(timePos, co.transform.DOMove(cob.OriginPos, GameConfig.BATTLE_CARD_DEATH_FLY_TIME));
         s.Insert(timePos, co.transform.DOScale(1.0f, GameConfig.BATTLE_CARD_SCALE_TIME));
     }

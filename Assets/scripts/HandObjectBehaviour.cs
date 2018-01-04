@@ -36,6 +36,7 @@ public class HandObjectBehaviour : MonoBehaviour
     internal void AddCard(GameObject co)
     {
         cardObjs.Add(co);
+        co.GetComponent<CardObjectBehaviour>().State = CardState.HAND;
         RerenderCards();
     }
 

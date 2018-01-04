@@ -48,3 +48,15 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Board
+    uniqueID: 1269737797
+    locked: 0
+  - name: Player
+    uniqueID: 2516922599
+    locked: 0
+  - name: Cards
+    uniqueID: 2466550477
+    locked: 0
+  - name: LiveEffect
+    uniqueID: 1103624371
+    locked: 0

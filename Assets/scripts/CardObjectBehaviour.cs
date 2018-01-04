@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
+using System.Collections.Generic;
+using System.Linq;
+using System;
 
 public class CardObjectBehaviour : MonoBehaviour
 {
@@ -14,6 +17,7 @@ public class CardObjectBehaviour : MonoBehaviour
     public Text CardDescription;
     public Image CardCostImage;
     public Text CardCostNumber;
+    public GameObject BuffAnchor;
 
     private static float zOffset = 0.5f;
     private float order;
@@ -21,6 +25,8 @@ public class CardObjectBehaviour : MonoBehaviour
     private Vector3 originPos;
     private Card cardData;
     private PlayerObjectBehaviour owner;
+    private List<GameObject> buffs;
+    private int state;
     private bool mouseHovering;
     private bool canMouseHover;
     private bool isPreviewing;
@@ -29,6 +35,7 @@ public class CardObjectBehaviour : MonoBehaviour
     public Card CardData {get { return cardData; } set { cardData = value; }}
     public PlayerObjectBehaviour Owner {get { return owner; }set { owner = value; }}
     public float Order {get { return order; }set { order = value; }}
+    public int State { get { return state; } set { state = value; } }
 
     public Vector3 TempPos;
 
@@ -53,6 +60,7 @@ public class CardObjectBehaviour : MonoBehaviour
         // layout
         cob.Order = zOffset;
         cob.isPreviewing = false;
+        cob.State = CardState.DEFAULT;
 
         if (!cardData.Type.Equals(CardTypes.CREATURE))
         {
@@ -62,6 +70,9 @@ public class CardObjectBehaviour : MonoBehaviour
 
         cob.Owner = player;
         cob.CardData = cardData;
+        cob.CardData.COB = cob;
+
+        cob.buffs = new List<GameObject>();
 
         zOffset += -0.01f;
         return co;
@@ -105,6 +116,18 @@ public class CardObjectBehaviour : MonoBehaviour
         }
     }
 
+    private void OnMouseDown()
+    {
+        BoardBehaviour bb = BoardBehaviour.GetInstance();
+        if (bb.GetUIState() == UIState.TARGETING)
+        {
+            if (state == CardState.SLOT)
+            {
+                bb.SelectTarget(gameObject);
+            }
+        }
+    }
+
     public void AddEffectParticle()
     {
         GameObject co = Instantiate(Resources.Load("prefabs/CardEffectParticle")) as GameObject;
@@ -112,9 +135,52 @@ public class CardObjectBehaviour : MonoBehaviour
         co.transform.SetParent(gameObject.transform);
     }
 
+    internal bool CanBattle()
+    {
+        bool can = true;
+        foreach(GameObject bo in buffs)
+        {
+            if (bo.GetComponent<BuffBehaviour>().BuffData.Type == Buff.BuffType.NO_BATTLE)
+            {
+                can = false;
+            }
+        }
+        return can;
+    }
+
     public void SetMouseHovering(bool canMouseHover)
     {
         this.canMouseHover = canMouseHover;
+    }
+
+    private void RerenderBuffs()
+    {
+        Vector3 pos = BuffAnchor.transform.position;
+        float z = gameObject.transform.position.z;
+        for (int i = 0; i < buffs.Count; i ++) 
+        {
+            GameObject bo = buffs.ElementAt(i);
+            bo.transform.position = new Vector3(pos.x + 0.144f + i * 0.288f, pos.y - 0.144f, z); // HARD CODE
+        }
+    }
+
+    public void AddBuff(GameObject bo)
+    {
+        buffs.Add(bo);
+        RerenderBuffs();
+    }
+
+    public void RemoveBuff(GameObject bo)
+    {
+        if (buffs.Remove(bo))
+        {
+            Destroy(bo);
+            RerenderBuffs();
+        }
+        else
+        {
+            throw new System.Exception("Trying to remove buff that does not exist.");
+        }
     }
 
 }

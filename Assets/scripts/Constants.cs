@@ -18,4 +18,15 @@ public class UIState
 {
     public static int ACTION = 0;
     public static int BATTLING = 100;
+    public static int TARGETING = 150;
+}
+
+public class CardState
+{
+    public static int DEFAULT = 0;
+    public static int DECK = 50;
+    public static int HAND = 100;
+    public static int SLOT = 200;
+    public static int GRAVE = 300;
+    public static int EFFECT = 400;
 }
