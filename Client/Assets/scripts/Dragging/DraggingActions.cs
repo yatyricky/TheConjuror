@@ -17,6 +17,10 @@ public abstract class DraggingActions : MonoBehaviour
         {
             return dragabble;
         }
+        set
+        {
+            dragabble = value;
+        }
     }
 
     protected abstract bool DragSuccessful();

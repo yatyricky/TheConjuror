@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,31 +7,22 @@ using UnityEngine.UI;
 public class DeckObjectBehaviour : MonoBehaviour
 {
     public Text CardsRemaining;
+    public GameObject PlayerObject;
 
-    private PlayerObjectBehaviour pob;
+    [HideInInspector] public PlayerObjectBehaviour Pob;
 
-    private void Start()
+    private void Awake()
     {
-        pob = GameLoop.FindParentWithTag(gameObject, "Player").GetComponent<PlayerObjectBehaviour>();
-        
+        Pob = PlayerObject.GetComponent<PlayerObjectBehaviour>();
     }
 
-    public void UpdateDeckNumber()
+    internal void UpdateDeckNumber(int deckN)
     {
-        CardsRemaining.text = pob.Player.Deck.Size.ToString();
+        CardsRemaining.text = deckN.ToString();
     }
 
-    public void DrawNCards(int num)
+    internal void DrawCardsUI(List<Card> cards, int deckN)
     {
-        new DrawCard(pob.Player, num).Fire(UpdateUI);
-    }
-
-    private void UpdateUI(GameAction.Payload payload)
-    {
-        new DrawCardView
-        {
-            Payload = payload.payload,
-            POB = pob
-        }.DoAction();
+        new DrawCardView(Pob, cards, deckN);
     }
 }

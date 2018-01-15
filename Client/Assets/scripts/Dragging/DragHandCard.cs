@@ -16,26 +16,26 @@ public class DragHandCard : DraggingActions
     {
         DisableAllGlow();
         RaycastHit[] hits = Physics.RaycastAll(origin: new Vector3(transform.position.x, transform.position.y, -10), direction: new Vector3(0, 0, 1), maxDistance: 30f);
-        // find card owner
+        // find card object behaviour
         CardObjectBehaviour cob = gameObject.GetComponent<CardObjectBehaviour>();
         foreach (RaycastHit h in hits)
         {
             // Find slot owner
-            PlayerObjectBehaviour hitPob = GameLoop.FindParentWithTag(h.transform.gameObject, "Player").GetComponent<PlayerObjectBehaviour>();
+            CardSlotBehaviour csob = h.transform.gameObject.GetComponent<CardSlotBehaviour>();
 
-            if (h.transform.tag == "CardSlot" && hitPob.PlayerId == cob.Owner.PlayerId)
+            if (h.transform.tag == "CardSlot" && csob.Pob.PlayerName.Equals(cob.Owner.PlayerName))
             {
-                h.transform.Find("glow").gameObject.SetActive(true);
+                csob.SetGlow(true);
             }
         }
     }
 
     private void DisableAllGlow()
     {
-        GameObject[] cardSlots = gameObject.GetComponent<CardObjectBehaviour>().Owner.CardSlots;
+        CardSlotBehaviour[] cardSlots = gameObject.GetComponent<CardObjectBehaviour>().Owner.CSob;
         for (int i = 0; i < cardSlots.Length; i ++)
         {
-            cardSlots[i].transform.Find("glow").gameObject.SetActive(false);
+            cardSlots[i].SetGlow(false);
         }
     }
 
@@ -53,50 +53,28 @@ public class DragHandCard : DraggingActions
                 endSlot = h.transform.gameObject;
             }
         }
-        bool playSuccess = false;
-        if (endSlot != null)
+        CardObjectBehaviour cob = gameObject.GetComponent<CardObjectBehaviour>();
+        if (endSlot != null && BoardBehaviour.IsCurrentPlayerAction())
         {
-            // Dragged into a cardslot
-            CardObjectBehaviour cob = gameObject.GetComponent<CardObjectBehaviour>();
+            //Dragged into a cardslot
             CardSlotBehaviour csb = endSlot.GetComponent<CardSlotBehaviour>();
-            if (cob.Owner.Player.CanPlayCardToSlot(cob.CardData, csb.SlotId))
-            {
-                if (cob.CardData.Type == CardTypes.CREATURE)
-                {
-                    new PlayCreatureCard(cob.Owner.Player, cob.CardData, csb.SlotId).Fire(PlayCreatureCardUpdateUI);
-                    playSuccess = true;
-                }
-                if (cob.CardData.Type == CardTypes.SPELL)
-                {
-                    PlaySpellCardPreAction(cob.Owner.Player, cob.CardData);
-                    playSuccess = true;
-                }
-            }
+            NetworkController.Instance.PlayerPlayCardToSlot(cob.Owner.PlayerName, cob.Guid, csb.SlotId);
+
+            // Move card to neutral position and play effects
+            Vector3 spellEffectPos = GameObject.FindGameObjectWithTag("BattleNeutral").transform.position;
+            gameObject.transform.DOMove(new Vector3(spellEffectPos.x, spellEffectPos.y, -3f), GameConfig.SPELL_CARD_FLY_TIME);
+            gameObject.transform.DOScale(GameConfig.SPELL_CARD_SCALE, GameConfig.SPELL_CARD_FLY_TIME);
+            //  - Add effect to the card
+            cob.AddEffectParticle();
         }
-        if (!playSuccess)
+        else
         {
             // Dragged into somewhere else
-            CardObjectBehaviour cob = gameObject.GetComponent<CardObjectBehaviour>();
             transform.DOMove(cob.OriginPos, 0.5f).SetEase(Ease.OutCubic);
         }
     }
-    
-    private void PlayCreatureCardUpdateUI(GameAction.Payload payload)
-    {
-        PlayerObjectBehaviour pob = gameObject.GetComponent<CardObjectBehaviour>().Owner;
-        int slot = (int)payload.payload;
-        // 1.Make creatures un draggale
-        dragabble = false;
-        // 2. Remove CardObject from HandObject
-        pob.HandArea.GetComponent<HandObjectBehaviour>().RemoveCard(gameObject);
-        // 3. Ease/ re-organize cards in card slot
-        CardSlotBehaviour csb = pob.CardSlots[slot].GetComponent<CardSlotBehaviour>();
-        csb.AddCard(gameObject);
-        // 4. update player mana
-        pob.UpdateMana();
-    }
 
-    private void PlaySpellCardPreAction(Player player, Card cardData)
+    private void PlaySpellCardPreAction(object player, Card cardData)
     {
         CardObjectBehaviour cob = gameObject.GetComponent<CardObjectBehaviour>();
         PlayerObjectBehaviour pob = cob.Owner;
@@ -117,16 +95,16 @@ public class DragHandCard : DraggingActions
         timeNode += GameConfig.SPELL_CARD_DISPLAY_TIME + GameConfig.SPELL_CARD_FLY_TIME;
         s.InsertCallback(timeNode, () =>
         {
-            new PlaySpellCard(player, cardData).Fire(PlaySpellCardUpdateUI);
+            //new PlaySpellCard(player, cardData).Fire(PlaySpellCardUpdateUI);
         });
     }
 
-    private void PlaySpellCardUpdateUI(GameAction.Payload payload)
+    private void PlaySpellCardUpdateUI(object payload)
     {
         CardObjectBehaviour cob = gameObject.GetComponent<CardObjectBehaviour>();
         PlayerObjectBehaviour pob = cob.Owner;
         // 5. Update player mana
-        pob.UpdateMana();
+        //pob.UpdateMana();
         // 6. Do corresponding UI logic
         if (payload != null)
         {
@@ -134,7 +112,7 @@ public class DragHandCard : DraggingActions
             Type type = null;
             try
             {
-                type = assembly.GetTypes().First(t => t.Name == payload.ActionName + "View");
+                //type = assembly.GetTypes().First(t => t.Name == payload.ActionName + "View");
             }
             catch (InvalidOperationException ioe)
             {
@@ -143,7 +121,7 @@ public class DragHandCard : DraggingActions
             if (type != null)
             {
                 GameActionUpdateUIView obj = (GameActionUpdateUIView)Activator.CreateInstance(type);
-                obj.Payload = payload.payload;
+                //obj.Payload = payload.payload;
                 obj.POB = pob;
                 obj.DoAction();
             }

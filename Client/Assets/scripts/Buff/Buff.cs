@@ -11,12 +11,12 @@ public class Buff
     protected string iconPath;
     protected int type;
     protected GameObject bo;
-    protected Player caster;
+    protected string caster;
 
     public GameObject BO { get { return bo; } internal set { bo = value; } }
     public string IconPath { get { return iconPath; } }
     public int Type { get { return type; } }
-    public Player Caster { get {return caster; } internal set {caster = value; } }
+    public string Caster { get {return caster; } internal set {caster = value; } }
 
     internal virtual bool ShouldRemoveEndTurn()
     {

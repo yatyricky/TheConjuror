@@ -15,7 +15,10 @@ public class StartGameButton : MonoBehaviour
 
     void TaskOnClick()
     {
-        NetworkController.instance.LoginPlayer(InputText.text);
+        if (InputText.text.Length > 0)
+        {
+            NetworkController.Instance.LoginPlayer(InputText.text);
+        }
     }
 
 }

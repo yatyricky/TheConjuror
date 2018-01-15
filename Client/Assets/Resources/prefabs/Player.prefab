@@ -579,7 +579,7 @@ GameObject:
   - component: {fileID: 224517166712678618}
   - component: {fileID: 222292604425362208}
   - component: {fileID: 114051414825580970}
-  - component: {fileID: 114646064313951312}
+  - component: {fileID: 114089338377837758}
   m_Layer: 5
   m_Name: Deck
   m_TagString: Untagged
@@ -821,6 +821,9 @@ MonoBehaviour:
   ImageAsset: {fileID: 21300000, guid: daedbff2877142e479bbeff488d5d447, type: 3}
   TheImage: {fileID: 114268893934586288}
   TotalPower: {fileID: 114840144001073212}
+  Glow: {fileID: 1087556863457420}
+  PlayerObject: {fileID: 1125102453275700}
+  Pob: {fileID: 0}
 --- !u!114 &114051414825580970
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -886,6 +889,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a6ecfb267ca89f408824b5a9a628fbc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &114089338377837758
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1861681464447694}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bb3664c418b08942aa2d5d67e137d7f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CardsRemaining: {fileID: 114798204177095500}
+  PlayerObject: {fileID: 1125102453275700}
+  Pob: {fileID: 0}
 --- !u!114 &114089828977764604
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -901,6 +918,9 @@ MonoBehaviour:
   ImageAsset: {fileID: 21300000, guid: 53929f4616486904aa3e1d938ad64e62, type: 3}
   TheImage: {fileID: 114696538412243244}
   TotalPower: {fileID: 114309674190297382}
+  Glow: {fileID: 1088118292113754}
+  PlayerObject: {fileID: 1125102453275700}
+  Pob: {fileID: 0}
 --- !u!114 &114108880798819534
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1221,6 +1241,9 @@ MonoBehaviour:
   ImageAsset: {fileID: 21300000, guid: b97388ea3a1eb7b4fa6c1b76fd45356b, type: 3}
   TheImage: {fileID: 114874934419120306}
   TotalPower: {fileID: 114843330711390982}
+  Glow: {fileID: 1265338610719544}
+  PlayerObject: {fileID: 1125102453275700}
+  Pob: {fileID: 0}
 --- !u!114 &114386389330669760
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1413,18 +1436,6 @@ MonoBehaviour:
   m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
---- !u!114 &114646064313951312
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1861681464447694}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3bb3664c418b08942aa2d5d67e137d7f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  CardsRemaining: {fileID: 114798204177095500}
 --- !u!114 &114675140016415100
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1500,6 +1511,9 @@ MonoBehaviour:
   ImageAsset: {fileID: 21300000, guid: 1ac44e8ae70cf224e9507055ca5b63a2, type: 3}
   TheImage: {fileID: 114200755035698400}
   TotalPower: {fileID: 114231775096819248}
+  Glow: {fileID: 1655278841454110}
+  PlayerObject: {fileID: 1125102453275700}
+  Pob: {fileID: 0}
 --- !u!114 &114696538412243244
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1579,18 +1593,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad2af8920dfb91a45ba2a4179e2b9bf1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PlayerId: 0
+  IsTop: 0
   HealthPoints: {fileID: 114874139812310288}
   ManaPoints: {fileID: 114770954747774084}
   HandArea: {fileID: 1401682354871872}
   Deck: {fileID: 1861681464447694}
+  Grave: {fileID: 1792469104210238}
   CardSlots:
   - {fileID: 1951117190631690}
   - {fileID: 1394876583310700}
   - {fileID: 1651294322976388}
   - {fileID: 1678640909500318}
   - {fileID: 1314685454068632}
-  Grave: {fileID: 1792469104210238}
+  Hob: {fileID: 0}
+  Dob: {fileID: 0}
+  CSob: []
 --- !u!114 &114751402471387206
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1740,6 +1757,9 @@ MonoBehaviour:
   ImageAsset: {fileID: 21300000, guid: f3f8e3103923e524d9eca2e4ace8ee80, type: 3}
   TheImage: {fileID: 114882221011750142}
   TotalPower: {fileID: 114690484352097552}
+  Glow: {fileID: 1059308534447140}
+  PlayerObject: {fileID: 1125102453275700}
+  Pob: {fileID: 0}
 --- !u!114 &114828414324977544
 MonoBehaviour:
   m_ObjectHideFlags: 1

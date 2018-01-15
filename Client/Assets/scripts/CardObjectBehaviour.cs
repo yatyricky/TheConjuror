@@ -7,6 +7,8 @@ using System;
 
 public class CardObjectBehaviour : MonoBehaviour
 {
+    public static Dictionary<int, CardObjectBehaviour> AllCards = new Dictionary<int, CardObjectBehaviour>();
+
     public Image CardClass; // earth/ fire/ air/ water
     public Image CardImage; // the graphics
     public Text CardName; // card name
@@ -23,19 +25,19 @@ public class CardObjectBehaviour : MonoBehaviour
     private float order;
 
     private Vector3 originPos;
-    private Card cardData;
     private PlayerObjectBehaviour owner;
     private List<GameObject> buffs;
+    private int guid;
     private int state;
     private bool mouseHovering;
     private bool canMouseHover;
     private bool isPreviewing;
 
     public Vector3 OriginPos {get{ return originPos; } set { originPos = value;}}
-    public Card CardData {get { return cardData; } set { cardData = value; }}
     public PlayerObjectBehaviour Owner {get { return owner; }set { owner = value; }}
     public float Order {get { return order; }set { order = value; }}
     public int State { get { return state; } set { state = value; } }
+    public int Guid { get { return guid; } }
 
     public Vector3 TempPos;
 
@@ -45,15 +47,15 @@ public class CardObjectBehaviour : MonoBehaviour
         CardObjectBehaviour cob = co.GetComponent<CardObjectBehaviour>();
 
         // card visual
-        cob.CardImage.sprite = Resources.Load<Sprite>("sprites/card_images/" + cardData.Id);
-        cob.CardName.text = cardData.Name;
-        cob.CardClass.sprite = Resources.Load<Sprite>("sprites/card_ui/frame_" + cardData.Color);
-        cob.CardType.sprite = Resources.Load<Sprite>("sprites/card_ui/type_" + cardData.Type);
-        cob.CardPower.text = cardData.Power.ToString();
-        cob.CardDescription.text = cardData.Description.Replace("|n", "\n");
-        cob.CardCostNumber.text = cardData.Cost.ToString();
-        cob.CardCostImage.sprite = Resources.Load<Sprite>("sprites/card_ui/mana_" + cardData.Color);
-        Sprite powerFrame = Resources.Load<Sprite>("sprites/card_ui/power_" + cardData.Color);
+        cob.CardImage.sprite = Resources.Load<Sprite>("sprites/card_images/" + cardData.id);
+        cob.CardName.text = cardData.name;
+        cob.CardClass.sprite = Resources.Load<Sprite>("sprites/card_ui/frame_" + cardData.color);
+        cob.CardType.sprite = Resources.Load<Sprite>("sprites/card_ui/type_" + cardData.ctype);
+        cob.CardPower.text = cardData.power.ToString();
+        cob.CardDescription.text = cardData.desc.Replace("|n", "\n");
+        cob.CardCostNumber.text = cardData.cost.ToString();
+        cob.CardCostImage.sprite = Resources.Load<Sprite>("sprites/card_ui/mana_" + cardData.color);
+        Sprite powerFrame = Resources.Load<Sprite>("sprites/card_ui/power_" + cardData.color);
         cob.CardTypeFrame.sprite = powerFrame;
         cob.CardPowerFrame.sprite = powerFrame;
 
@@ -62,20 +64,45 @@ public class CardObjectBehaviour : MonoBehaviour
         cob.isPreviewing = false;
         cob.State = CardState.DEFAULT;
 
-        if (!cardData.Type.Equals(CardTypes.CREATURE))
+        if (!cardData.ctype.Equals(CardTypes.CREATURE))
         {
             cob.CardPowerFrame.enabled = false;
             cob.CardPower.enabled = false;
         }
 
         cob.Owner = player;
-        cob.CardData = cardData;
-        cob.CardData.COB = cob;
-
         cob.buffs = new List<GameObject>();
-
         zOffset += -0.01f;
+        cob.guid = cardData.guid;
+
+        AddCard(cob);
+
         return co;
+    }
+
+    private static void AddCard(CardObjectBehaviour cob)
+    {
+        try
+        {
+            AllCards.Add(cob.guid, cob);
+        }
+        catch (ArgumentException e)
+        {
+            throw new Exception(" --- Catched --- : " + e.Message);
+        }
+    }
+
+    public static CardObjectBehaviour GetCOB(int id)
+    {
+        CardObjectBehaviour ret = null;
+        if (AllCards.TryGetValue(id, out ret))
+        {
+            return ret;
+        }
+        else
+        {
+            throw new Exception("No such card in the game, id: " + id);
+        }
     }
 
     private void Awake()
@@ -86,8 +113,7 @@ public class CardObjectBehaviour : MonoBehaviour
 
     private void OnMouseOver()
     {
-        BoardBehaviour bb = GameObject.FindGameObjectWithTag("GameController").GetComponent<BoardBehaviour>();
-        if (!mouseHovering && !isPreviewing && bb.GetUIState() != UIState.BATTLING && canMouseHover)
+        if (!mouseHovering && !isPreviewing && BoardBehaviour.GetUIState() != UIState.BATTLING && canMouseHover)
         {
             gameObject.transform.position = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y, -2f);
             mouseHovering = true;
@@ -118,12 +144,11 @@ public class CardObjectBehaviour : MonoBehaviour
 
     private void OnMouseDown()
     {
-        BoardBehaviour bb = BoardBehaviour.GetInstance();
-        if (bb.GetUIState() == UIState.TARGETING)
+        if (BoardBehaviour.GetUIState() == UIState.TARGETING)
         {
             if (state == CardState.SLOT)
             {
-                bb.SelectTarget(gameObject);
+                BoardBehaviour.SelectTarget(gameObject);
             }
         }
     }
@@ -179,8 +204,12 @@ public class CardObjectBehaviour : MonoBehaviour
         }
         else
         {
-            throw new System.Exception("Trying to remove buff that does not exist.");
+            throw new Exception("Trying to remove buff that does not exist.");
         }
     }
 
+    internal void UpdatePower(int val)
+    {
+        CardPower.text = val.ToString();
+    }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using DG.Tweening;
 
 public class HandObjectBehaviour : MonoBehaviour
 {
@@ -59,5 +60,12 @@ public class HandObjectBehaviour : MonoBehaviour
             cardObjs.RemoveAt(index);
         }
         RerenderCards();
+    }
+
+    internal void PlayCardFail(GameObject co)
+    {
+        CardObjectBehaviour cob = co.GetComponent<CardObjectBehaviour>();
+        co.transform.DOMove(cob.OriginPos, GameConfig.BATTLE_CARD_DEATH_FLY_TIME);
+        co.transform.DOScale(1.0f, GameConfig.BATTLE_CARD_DEATH_FLY_TIME);
     }
 }

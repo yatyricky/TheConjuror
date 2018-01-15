@@ -1,65 +1,65 @@
-﻿using System;
+﻿using DG.Tweening;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class PlayerObjectBehaviour : MonoBehaviour
 {
-    public int PlayerId;
+    public bool IsTop;
     public Text HealthPoints;
     public Text ManaPoints;
     public GameObject HandArea;
     public GameObject Deck;
-    public GameObject[] CardSlots;
     public GameObject Grave;
+    public GameObject[] CardSlots;
 
-    private Player player;
+    private string playerName;
+    public string PlayerName { get { return playerName; } set { playerName = value; } }
 
-    public Player Player { get { return player; }}
+    [HideInInspector] public HandObjectBehaviour Hob;
+    [HideInInspector] public DeckObjectBehaviour Dob;
+    [HideInInspector] public CardSlotBehaviour[] CSob;
 
-    private void Start()
+    private void Awake()
     {
-        // HARDCODE
-        if (PlayerId == 0)
-            player = new Player(this, "blue_basic");
-        else
-            player = new Player(this, "red_basic");
-    }
-
-    public void UpdateHealth()
-    {
-        int sum = player.Health;
-        HealthPoints.text = sum.ToString();
-    }
-
-    public void UpdateMana()
-    {
-        int sum = player.Mana;
-        ManaPoints.text = sum.ToString();
-    }
-
-    public PlayerObjectBehaviour GetOpponent()
-    {
-        BoardBehaviour bb = GameObject.FindGameObjectWithTag("GameController").GetComponent<BoardBehaviour>();
-        PlayerObjectBehaviour p1 = bb.PlayerA.GetComponent<PlayerObjectBehaviour>();
-        PlayerObjectBehaviour p2 = bb.PlayerB.GetComponent<PlayerObjectBehaviour>();
-        if (PlayerId == p1.PlayerId)
+        Hob = HandArea.GetComponent<HandObjectBehaviour>();
+        Dob = Deck.GetComponent<DeckObjectBehaviour>();
+        CSob = new CardSlotBehaviour[5];
+        for (int i = 0; i < CardSlots.Length; i++)
         {
-            return p2;
+            CSob[i] = CardSlots[i].GetComponent<CardSlotBehaviour>();
+            UpdateCardSlotPower(i, 0);
         }
-        else
-        {
-            return p1;
-        }
+        UpdateHealth(0);
+        UpdateMana(0);
+        UpdateDeckNumber(0);
     }
 
-    internal void UpdateAll()
+    internal void UpdateCardSlotPower(int n, int v)
     {
-        UpdateHealth();
-        UpdateMana();
-        Deck.GetComponent<DeckObjectBehaviour>().UpdateDeckNumber();
-        for (int i = 0; i < CardSlots.Length; i ++)
-        {
-            CardSlots[i].GetComponent<CardSlotBehaviour>().UpdatePower();
-        }
+        CSob[n].UpdatePower(v);
+    }
+
+    internal void UpdateHealth(int hp)
+    {
+        HealthPoints.text = hp.ToString();
+    }
+
+    internal void UpdateMana(int mp)
+    {
+        ManaPoints.text = mp.ToString();
+    }
+
+    internal void UpdateDeckNumber(int deckN)
+    {
+        Dob.UpdateDeckNumber(deckN);
+    }
+
+    internal void DiscardCard(GameObject co)
+    {
+        CardObjectBehaviour cob = co.GetComponent<CardObjectBehaviour>();
+        cob.OriginPos = Grave.transform.position;
+        co.transform.DOMove(cob.OriginPos, GameConfig.BATTLE_CARD_DEATH_FLY_TIME);
+        co.transform.DOScale(1.0f, GameConfig.BATTLE_CARD_DEATH_FLY_TIME);
     }
 }

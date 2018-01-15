@@ -2,17 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 
-public class DrawCardView : GameActionUpdateUIView
+public class DrawCardView
 {
-
-    public override void DoAction()
+    public DrawCardView(PlayerObjectBehaviour pob, List<Card> cards, int deckN)
     {
-        List<Card> cardList = (List<Card>)Payload;
-        for (int i = 0; i < cardList.Count; i++)
+        for (int i = 0; i < cards.Count; i++)
         {
-            GameObject co = CardObjectBehaviour.Create(cardList.ElementAt(i), POB);
-            POB.HandArea.GetComponent<HandObjectBehaviour>().AddCard(co);
+            GameObject co = CardObjectBehaviour.Create(cards.ElementAt(i), pob);
+            pob.Hob.AddCard(co);
+            if (!BoardBehaviour.LocalPlayerName.Equals(pob.PlayerName))
+            {
+                co.GetComponent<DragHandCard>().CanDrag = false;
+            }
         }
-        POB.Deck.GetComponent<DeckObjectBehaviour>().UpdateDeckNumber();
+        pob.Dob.UpdateDeckNumber(deckN);
     }
+
 }
