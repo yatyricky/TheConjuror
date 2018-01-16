@@ -4,9 +4,6 @@
         this.card = card;
     }
 
-    doAction(player, callBack) {
-    }
-
     getBattleModifier(isAttacker) {
         if (isAttacker) {
             return 0 - this.card.getPower();

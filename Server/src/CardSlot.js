@@ -109,13 +109,17 @@ class CardSlot {
                 const className = "Card" + item.getId();
                 if (CardAbility.hasOwnProperty(className)) {
                     const obj = new CardAbility[className](item);
-                    let mod = obj.getBattleModifier(isAttacker);
-                    if (mod != 0) {
-                        res.push({
-                            guid: item.getGuid(),
-                            mod: mod
-                        });
-                        sum += mod;
+                    if (CardAbility[className].prototype.hasOwnProperty("getBattleModifier")) {
+                        let mod = obj.getBattleModifier(isAttacker);
+                        if (mod != 0) {
+                            res.push({
+                                guid: item.getGuid(),
+                                mod: mod
+                            });
+                            sum += mod;
+                        }
+                    } else {
+                        console.error(`[E]CardSlot.getModifiers: ${className} has not defined getBattleModifier`);
                     }
                 }
             }

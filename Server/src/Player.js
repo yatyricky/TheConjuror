@@ -199,10 +199,17 @@ class Player {
                 this.cardSlots[slotId].add(card);
             } else if (card.getType() == CardTypes.SPELL) {
                 const className = "Card" + card.getId();
-                // if (CardAbility.hasOwnProperty(className)) {
-                //     const obj = new CardAbility[className](item);
-                //     obj.doAction();
-                // }
+                if (CardAbility.hasOwnProperty(className)) {
+                    const obj = new CardAbility[className](card);
+                    if (CardAbility[className].prototype.hasOwnProperty("doAction")) {
+                        const resp = obj.doAction(this);
+                        if (resp !== undefined && resp.hasOwnProperty("ename")) {
+                            res.payloads.push(resp);
+                        }
+                    } else {
+                        console.error(`[E]Player.playCardFromHand: ${className} has not defined doAction`);
+                    }
+                }
                 cardDest = MagicNumbers.TO_GRAVE;
                 this.grave.push(card);
             } else {
