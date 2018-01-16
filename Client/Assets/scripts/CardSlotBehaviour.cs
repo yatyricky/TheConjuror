@@ -28,7 +28,7 @@ public class CardSlotBehaviour : MonoBehaviour
         cardObjs = new List<GameObject>();
     }
 
-    internal void RerenderCards()
+    internal void RerenderCards(Sequence s, float t)
     {
         if (cardObjs.Count > 0)
         {
@@ -48,8 +48,8 @@ public class CardSlotBehaviour : MonoBehaviour
             {
                 Vector3 pos = new Vector3(basePos.x + i * margin, basePos.y, (i + 1) * -0.01f - 1f);
                 GameObject item = cardObjs.ElementAt(i);
-                item.transform.DOMove(pos, GameConfig.F("CARD_SLOT_RENDER_MOVE_TIME"));
-                item.transform.DOScale(1.0f, GameConfig.F("CARD_SLOT_RENDER_MOVE_TIME"));
+                s.Insert(t, item.transform.DOMove(pos, GameConfig.F("CARD_SLOT_RENDER_MOVE_TIME")));
+                s.Insert(t, item.transform.DOScale(1.0f, GameConfig.F("CARD_SLOT_RENDER_MOVE_TIME")));
                 item.GetComponent<CardObjectBehaviour>().OriginPos = pos;
 
                 item.SetActive(true);
@@ -62,11 +62,11 @@ public class CardSlotBehaviour : MonoBehaviour
         Glow.SetActive(v);
     }
 
-    internal void AddCard(GameObject co)
+    internal void AddCard(GameObject co, Sequence s, float t)
     {
         cardObjs.Add(co);
         co.GetComponent<CardObjectBehaviour>().State = CardState.SLOT;
-        RerenderCards();
+        RerenderCards(s, t);
     }
 
     public void UpdatePower(int v)

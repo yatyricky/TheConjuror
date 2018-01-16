@@ -31,7 +31,7 @@ public class CardObjectBehaviour : MonoBehaviour
     private int state;
     private bool mouseHovering;
     private bool canMouseHover;
-    private bool isPreviewing;
+    private bool isExpanding;
 
     public Vector3 OriginPos {get{ return originPos; } set { originPos = value;}}
     public PlayerObjectBehaviour Owner {get { return owner; }set { owner = value; }}
@@ -61,7 +61,7 @@ public class CardObjectBehaviour : MonoBehaviour
 
         // layout
         cob.Order = zOffset;
-        cob.isPreviewing = false;
+        cob.isExpanding = false;
         cob.State = CardState.DEFAULT;
 
         if (!cardData.ctype.Equals(CardTypes.CREATURE))
@@ -113,7 +113,7 @@ public class CardObjectBehaviour : MonoBehaviour
 
     private void OnMouseOver()
     {
-        if (!mouseHovering && !isPreviewing && BoardBehaviour.GetUIState() != UIState.BATTLING && canMouseHover)
+        if (!mouseHovering && !isExpanding && BoardBehaviour.GetUIState() != UIState.BATTLING && canMouseHover)
         {
             gameObject.transform.position = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y, -2f);
             mouseHovering = true;
@@ -121,21 +121,21 @@ public class CardObjectBehaviour : MonoBehaviour
 
         if (Input.GetAxis("Mouse ScrollWheel") > 0f)
         {
-            gameObject.transform.DOMove(new Vector3(0f, 0f, -2f), 0.2f).SetEase(Ease.OutCubic);
-            gameObject.transform.DOScale(2f, 0.2f).SetEase(Ease.OutCubic);
-            isPreviewing = true;
+            gameObject.transform.DOMove(new Vector3(0f, 0f, -2f), GameConfig.F("CARD_EXPAND_TIME")).SetEase(Ease.OutCubic);
+            gameObject.transform.DOScale(GameConfig.F("CARD_EXPAND_SCALE"), GameConfig.F("CARD_EXPAND_TIME")).SetEase(Ease.OutCubic);
+            isExpanding = true;
         }
         if (Input.GetAxis("Mouse ScrollWheel") < 0f)
         {
-            gameObject.transform.DOMove(originPos, 0.2f).SetEase(Ease.OutCubic);
-            gameObject.transform.DOScale(1f, 0.2f).SetEase(Ease.OutCubic);
-            isPreviewing = false;
+            gameObject.transform.DOMove(originPos, GameConfig.F("CARD_EXPAND_TIME")).SetEase(Ease.OutCubic);
+            gameObject.transform.DOScale(1f, GameConfig.F("CARD_EXPAND_TIME")).SetEase(Ease.OutCubic);
+            isExpanding = false;
         }
     }
 
     private void OnMouseExit()
     {
-        if (mouseHovering && !isPreviewing && canMouseHover)
+        if (mouseHovering && !isExpanding && canMouseHover)
         {
             gameObject.transform.position = originPos;
             mouseHovering = false;

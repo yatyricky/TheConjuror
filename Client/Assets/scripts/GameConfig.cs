@@ -26,7 +26,8 @@ public class GameConfig
         if (Instance.table.TryGetValue(key, out val))
         {
             return float.Parse(val);
-        } else
+        }
+        else
         {
             throw new Exception("No such config: " + key);
         }

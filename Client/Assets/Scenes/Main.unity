@@ -317,6 +317,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PlayerA: {fileID: 2146833053}
   PlayerB: {fileID: 28148063}
+  NeutralBattlePointGO: {fileID: 837924992}
+  AttackerBattlePointtGO: {fileID: 1475141465}
+  DefenderBattlePointGO: {fileID: 1144280586}
 --- !u!1 &495682892
 GameObject:
   m_ObjectHideFlags: 0

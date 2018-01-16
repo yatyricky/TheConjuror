@@ -55,11 +55,11 @@ public class PlayerObjectBehaviour : MonoBehaviour
         Dob.UpdateDeckNumber(deckN);
     }
 
-    internal void DiscardCard(GameObject co)
+    internal void DiscardCard(GameObject co, Sequence s, float t)
     {
         CardObjectBehaviour cob = co.GetComponent<CardObjectBehaviour>();
         cob.OriginPos = Grave.transform.position;
-        co.transform.DOMove(cob.OriginPos, GameConfig.F("BATTLE_CARD_DEATH_FLY_TIME"));
-        co.transform.DOScale(1.0f, GameConfig.F("BATTLE_CARD_DEATH_FLY_TIME"));
+        s.Insert(t, co.transform.DOMove(cob.OriginPos, GameConfig.F("BATTLE_CARD_DEATH_FLY_TIME")));
+        s.Insert(t, co.transform.DOScale(1.0f, GameConfig.F("BATTLE_CARD_DEATH_FLY_TIME")));
     }
 }

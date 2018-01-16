@@ -61,7 +61,7 @@ public class DragHandCard : DraggingActions
             NetworkController.Instance.PlayerPlayCardToSlot(cob.Owner.PlayerName, cob.Guid, csb.SlotId);
 
             // Move card to neutral position and play effects
-            Vector3 spellEffectPos = GameObject.FindGameObjectWithTag("BattleNeutral").transform.position;
+            Vector3 spellEffectPos = BoardBehaviour.NeutralBattlePoint.transform.position;
             gameObject.transform.DOMove(new Vector3(spellEffectPos.x, spellEffectPos.y, -3f), GameConfig.F("SPELL_CARD_FLY_TIME"));
             gameObject.transform.DOScale(GameConfig.F("SPELL_CARD_SCALE"), GameConfig.F("SPELL_CARD_FLY_TIME"));
             //  - Add effect to the card
@@ -87,7 +87,7 @@ public class DragHandCard : DraggingActions
         Sequence s = DOTween.Sequence();
         float timeNode = 0f;
         // 3. Move to battle field neutral position
-        Vector3 spellEffectPos = GameObject.FindGameObjectWithTag("BattleNeutral").transform.position;
+        Vector3 spellEffectPos = BoardBehaviour.NeutralBattlePoint.transform.position;
         s.Insert(timeNode, gameObject.transform.DOMove(new Vector3(spellEffectPos.x, spellEffectPos.y, -3f), GameConfig.F("SPELL_CARD_FLY_TIME")));
         s.Insert(timeNode, gameObject.transform.DOScale(GameConfig.F("SPELL_CARD_SCALE"), GameConfig.F("SPELL_CARD_FLY_TIME")));
         // 4. Add effect to the card

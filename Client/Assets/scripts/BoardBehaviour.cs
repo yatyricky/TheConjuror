@@ -15,8 +15,17 @@ public class BoardBehaviour : MonoBehaviour
     private static int uiState;
     private static SelectTargetCard currentSelector;
 
+    [Header("Players")]
     public GameObject PlayerA;
     public GameObject PlayerB;
+    [Header("Public Game Objects")]
+    public GameObject NeutralBattlePointGO;
+    public GameObject AttackerBattlePointtGO;
+    public GameObject DefenderBattlePointGO;
+
+    [HideInInspector] public static GameObject NeutralBattlePoint;
+    [HideInInspector] public static GameObject AttackerBattlePoint;
+    [HideInInspector] public static GameObject DefenderBattlePoint;
 
     private void Awake()
     {
@@ -25,6 +34,9 @@ public class BoardBehaviour : MonoBehaviour
 
         LocalPlayer = PlayerA.GetComponent<PlayerObjectBehaviour>();
         EnemyPlayer = PlayerB.GetComponent<PlayerObjectBehaviour>();
+        NeutralBattlePoint = NeutralBattlePointGO;
+        AttackerBattlePoint = AttackerBattlePointtGO;
+        DefenderBattlePoint = DefenderBattlePointGO;
     }
 
     private void Update()
@@ -137,18 +149,25 @@ public class BoardBehaviour : MonoBehaviour
         int guid = (int)data[1];
         int dest = (int)data[2];
         int mana = (int)data[3];
-        GameObject co = CardObjectBehaviour.GetCOB(guid).gameObject;
-        DragHandCard dhc = co.GetComponent<DragHandCard>();
-        if (dest == -1)
-        {
-            forPlayer.Hob.PlayCardFail(co);
-        }
-        else if (dest == 99)
+        CardObjectBehaviour cob = CardObjectBehaviour.GetCOB(guid);
+        DragHandCard dhc = cob.gameObject.GetComponent<DragHandCard>();
+
+        Sequence s = DOTween.Sequence();
+        float t = 0f;
+        // Move card to neutral position and play effects
+        Vector3 spellEffectPos = NeutralBattlePoint.transform.position;
+        s.Insert(t, cob.gameObject.transform.DOMove(new Vector3(spellEffectPos.x, spellEffectPos.y, -3f), GameConfig.F("SPELL_CARD_FLY_TIME")));
+        s.Insert(t, cob.gameObject.transform.DOScale(GameConfig.F("SPELL_CARD_SCALE"), GameConfig.F("SPELL_CARD_FLY_TIME")));
+        cob.AddEffectParticle();
+
+        t += GameConfig.F("SPELL_CARD_FLY_TIME") + GameConfig.F("SPELL_CARD_DISPLAY_TIME");
+
+        if (dest == 99)
         {
             // Played a spell card
             forPlayer.UpdateMana(mana);
-            forPlayer.Hob.RemoveCard(co);
-            forPlayer.DiscardCard(co);
+            forPlayer.Hob.RemoveCard(cob.gameObject);
+            forPlayer.DiscardCard(cob.gameObject, s, t);
             dhc.CanDrag = false;
         }
         else
@@ -157,8 +176,8 @@ public class BoardBehaviour : MonoBehaviour
             int slotPower = (int)data[4];
             forPlayer.UpdateCardSlotPower(dest, slotPower);
             forPlayer.UpdateMana(mana);
-            forPlayer.Hob.RemoveCard(co);
-            forPlayer.CSob[dest].AddCard(co);
+            forPlayer.Hob.RemoveCard(cob.gameObject);
+            forPlayer.CSob[dest].AddCard(cob.gameObject, s, t);
             dhc.CanDrag = false;
         }
     }
@@ -217,11 +236,9 @@ public class BoardBehaviour : MonoBehaviour
         // Move 2 set of cards to battle position
         int indexCountA = 0;
         int indexCountB = 0;
-        GameObject attackerGO = GameObject.FindGameObjectWithTag("BattleAttacker");
-        GameObject defenderGO = GameObject.FindGameObjectWithTag("BattleDefender");
-        Vector3 attackerAnchor = attackerGO.transform.position;
+        Vector3 attackerAnchor = AttackerBattlePoint.transform.position;
         attackerAnchor.z = GameConfig.F("BATTLE_Z_INDEX");
-        Vector3 defenderAnchor = defenderGO.transform.position;
+        Vector3 defenderAnchor = DefenderBattlePoint.transform.position;
         defenderAnchor.z = GameConfig.F("BATTLE_Z_INDEX");
         for (int i = 0; i < abattle.Count; i++)
         {
@@ -265,8 +282,8 @@ public class BoardBehaviour : MonoBehaviour
                 item.AddEffectParticle();
             });
             // show effect values
-            GameObject buffLabel = attackerGO.transform.Find("Buff").gameObject;
-            GameObject debuffLabel = attackerGO.transform.Find("Debuff").gameObject;
+            GameObject buffLabel = AttackerBattlePoint.transform.Find("Buff").gameObject;
+            GameObject debuffLabel = AttackerBattlePoint.transform.Find("Debuff").gameObject;
             GameObject activeLabel = null;
             if (bcm.mod > 0)
             {
@@ -323,8 +340,8 @@ public class BoardBehaviour : MonoBehaviour
             s.Insert(time, item.transform.DOMove(new Vector3(item.TempPos.x, item.TempPos.y, item.TempPos.z - 1f), GameConfig.F("BATTLE_CARD_EFFECT_SCALE_TIME")));
             s.Insert(time, item.transform.DOScale(GameConfig.F("BATTLE_CARD_EFFECT_SCALE"), GameConfig.F("BATTLE_CARD_EFFECT_SCALE_TIME")));
             // show effect values
-            GameObject buffLabel = defenderGO.transform.Find("Buff").gameObject;
-            GameObject debuffLabel = defenderGO.transform.Find("Debuff").gameObject;
+            GameObject buffLabel = DefenderBattlePoint.transform.Find("Buff").gameObject;
+            GameObject debuffLabel = DefenderBattlePoint.transform.Find("Debuff").gameObject;
             GameObject activeLabel = null;
             if (bcm.mod > 0)
             {
@@ -438,19 +455,19 @@ public class BoardBehaviour : MonoBehaviour
             }
         });
 
+        if (aname.Equals(LocalPlayer.PlayerName))
+        {
+            LocalPlayer.CSob[acs].RerenderCards(s, endTimeNode);
+            EnemyPlayer.CSob[dcs].RerenderCards(s, endTimeNode);
+        }
+        else if (dname.Equals(LocalPlayer.PlayerName))
+        {
+            EnemyPlayer.CSob[acs].RerenderCards(s, endTimeNode);
+            LocalPlayer.CSob[dcs].RerenderCards(s, endTimeNode);
+        }
+
         s.OnComplete(() =>
         {
-            if (aname.Equals(LocalPlayer.PlayerName))
-            {
-                LocalPlayer.CSob[acs].RerenderCards();
-                EnemyPlayer.CSob[dcs].RerenderCards();
-            }
-            else if (dname.Equals(LocalPlayer.PlayerName))
-            {
-                EnemyPlayer.CSob[acs].RerenderCards();
-                LocalPlayer.CSob[dcs].RerenderCards();
-            }
-
             SetUIState(UIState.ACTION);
         });
 
