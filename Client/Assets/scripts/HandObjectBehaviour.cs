@@ -44,7 +44,7 @@ public class HandObjectBehaviour : MonoBehaviour
     internal void RemoveCard(GameObject co)
     {
         int index = -1;
-        for (int i = 0; i < cardObjs.Count && index == -1; i ++)
+        for (int i = 0; i < cardObjs.Count && index == -1; i++)
         {
             if (co == cardObjs.ElementAt(i))
             {
@@ -65,7 +65,7 @@ public class HandObjectBehaviour : MonoBehaviour
     internal void PlayCardFail(GameObject co)
     {
         CardObjectBehaviour cob = co.GetComponent<CardObjectBehaviour>();
-        co.transform.DOMove(cob.OriginPos, GameConfig.BATTLE_CARD_DEATH_FLY_TIME);
-        co.transform.DOScale(1.0f, GameConfig.BATTLE_CARD_DEATH_FLY_TIME);
+        co.transform.DOMove(cob.OriginPos, GameConfig.F("BATTLE_CARD_DEATH_FLY_TIME"));
+        co.transform.DOScale(1.0f, GameConfig.F("BATTLE_CARD_DEATH_FLY_TIME"));
     }
 }

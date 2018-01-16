@@ -1,25 +1,77 @@
-﻿public class GameConfig
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using UnityEngine;
+
+public class GameConfig
 {
-    public static float CARD_SLOT_RENDER_MOVE_TIME = 0.1f;
+    private static GameConfig instance = null;
+    private Dictionary<string, string> table;
 
-    public static float BATTLE_Z_INDEX = -2.0f;
-    public static float BATTLE_CARD_SPACING = 0.5f;
-    public static float BATTLE_CARD_INTERVAL = 0.15f;
-    public static float BATTLE_CARD_FLY_TIME = 0.3f;
-    public static float BATTLE_CARD_SCALE_TIME = 0.3f;
-    public static float BATTLE_CARD_SCALE = 1.7f;
-    public static float BATTLE_CARD_EFFECT_SCALE = 2.0f;
-    public static float BATTLE_CARD_EFFECT_SCALE_TIME = 0.1f;
-    public static float BATTLE_CARD_EFFECT_HIGHLIGHT_PAUSE = 0.5f;
-    public static float BATTLE_CARD_EFFECT_LABEL_SCALE = 1.5f;
-    public static float BATTLE_CARD_EFFECT_LABEL_PAUSE = 1.7f;
-    public static float BATTLE_CARD_EFFECT_LABEL_SCALE_TIME = 0.2f;
-    public static float BATTLE_CARD_DEATH_FLY_TIME = 1f;
-    public static float BATTLE_SLASH_TIME = 0.13f;
-    public static float BATTLE_AFTER_DAMAGE_INTV = 0.7f;
+    private static GameConfig Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
+                instance = new GameConfig();
+            }
+            return instance;
+        }
+    }
 
-    public static float SPELL_CARD_FLY_TIME = 0.1f;
-    public static float SPELL_CARD_SCALE = 2f;
-    public static float SPELL_CARD_DISPLAY_TIME = 1.5f;
-    public static float SPELL_CARD_UI_EFFECT_TIME = 1.5f;
+    public static float F(string key)
+    {
+        string val;
+        if (Instance.table.TryGetValue(key, out val))
+        {
+            return float.Parse(val);
+        } else
+        {
+            throw new Exception("No such config: " + key);
+        }
+    }
+
+    public static int I(string key)
+    {
+        string val;
+        if (Instance.table.TryGetValue(key, out val))
+        {
+            return int.Parse(val);
+        }
+        else
+        {
+            throw new Exception("No such config: " + key);
+        }
+    }
+
+    public static string S(string key)
+    {
+        string val;
+        if (Instance.table.TryGetValue(key, out val))
+        {
+            return val;
+        }
+        else
+        {
+            throw new Exception("No such config: " + key);
+        }
+    }
+
+    private GameConfig()
+    {
+        table = new Dictionary<string, string>();
+        StringReader reader = new StringReader(Resources.Load<TextAsset>("data/config").text);
+        string line;
+        while ((line = reader.ReadLine()) != null)
+        {
+            string[] tokens = line.Split('=');
+            if (tokens.Length == 2)
+            {
+                table.Add(tokens[0], tokens[1]);
+            }
+        }
+
+    }
+
 }

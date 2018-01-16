@@ -2,7 +2,6 @@
 using SocketIO;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
-using System;
 
 public class NetworkController : MonoBehaviour
 {

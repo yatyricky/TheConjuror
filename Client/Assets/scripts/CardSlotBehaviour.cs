@@ -44,12 +44,12 @@ public class CardSlotBehaviour : MonoBehaviour
                 basePos = new Vector3(gameObject.transform.position.x - handWidth / 2.0f + cardWidth / 2.0f, gameObject.transform.position.y, gameObject.transform.position.z);
             }
 
-            for (int i = 0; i < cardObjs.Count; i ++)
+            for (int i = 0; i < cardObjs.Count; i++)
             {
                 Vector3 pos = new Vector3(basePos.x + i * margin, basePos.y, (i + 1) * -0.01f - 1f);
                 GameObject item = cardObjs.ElementAt(i);
-                item.transform.DOMove(pos, GameConfig.CARD_SLOT_RENDER_MOVE_TIME);
-                item.transform.DOScale(1.0f, GameConfig.CARD_SLOT_RENDER_MOVE_TIME);
+                item.transform.DOMove(pos, GameConfig.F("CARD_SLOT_RENDER_MOVE_TIME"));
+                item.transform.DOScale(1.0f, GameConfig.F("CARD_SLOT_RENDER_MOVE_TIME"));
                 item.GetComponent<CardObjectBehaviour>().OriginPos = pos;
 
                 item.SetActive(true);
@@ -96,7 +96,7 @@ public class CardSlotBehaviour : MonoBehaviour
         CardObjectBehaviour cob = co.GetComponent<CardObjectBehaviour>();
         cob.OriginPos = Pob.Grave.transform.position;
         cob.State = CardState.GRAVE;
-        s.Insert(timePos, co.transform.DOMove(cob.OriginPos, GameConfig.BATTLE_CARD_DEATH_FLY_TIME));
-        s.Insert(timePos, co.transform.DOScale(1.0f, GameConfig.BATTLE_CARD_SCALE_TIME));
+        s.Insert(timePos, co.transform.DOMove(cob.OriginPos, GameConfig.F("BATTLE_CARD_DEATH_FLY_TIME")));
+        s.Insert(timePos, co.transform.DOScale(1.0f, GameConfig.F("BATTLE_CARD_SCALE_TIME")));
     }
 }

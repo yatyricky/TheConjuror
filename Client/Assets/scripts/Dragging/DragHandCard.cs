@@ -33,7 +33,7 @@ public class DragHandCard : DraggingActions
     private void DisableAllGlow()
     {
         CardSlotBehaviour[] cardSlots = gameObject.GetComponent<CardObjectBehaviour>().Owner.CSob;
-        for (int i = 0; i < cardSlots.Length; i ++)
+        for (int i = 0; i < cardSlots.Length; i++)
         {
             cardSlots[i].SetGlow(false);
         }
@@ -62,8 +62,8 @@ public class DragHandCard : DraggingActions
 
             // Move card to neutral position and play effects
             Vector3 spellEffectPos = GameObject.FindGameObjectWithTag("BattleNeutral").transform.position;
-            gameObject.transform.DOMove(new Vector3(spellEffectPos.x, spellEffectPos.y, -3f), GameConfig.SPELL_CARD_FLY_TIME);
-            gameObject.transform.DOScale(GameConfig.SPELL_CARD_SCALE, GameConfig.SPELL_CARD_FLY_TIME);
+            gameObject.transform.DOMove(new Vector3(spellEffectPos.x, spellEffectPos.y, -3f), GameConfig.F("SPELL_CARD_FLY_TIME"));
+            gameObject.transform.DOScale(GameConfig.F("SPELL_CARD_SCALE"), GameConfig.F("SPELL_CARD_FLY_TIME"));
             //  - Add effect to the card
             cob.AddEffectParticle();
         }
@@ -88,11 +88,11 @@ public class DragHandCard : DraggingActions
         float timeNode = 0f;
         // 3. Move to battle field neutral position
         Vector3 spellEffectPos = GameObject.FindGameObjectWithTag("BattleNeutral").transform.position;
-        s.Insert(timeNode, gameObject.transform.DOMove(new Vector3(spellEffectPos.x, spellEffectPos.y, -3f), GameConfig.SPELL_CARD_FLY_TIME));
-        s.Insert(timeNode, gameObject.transform.DOScale(GameConfig.SPELL_CARD_SCALE, GameConfig.SPELL_CARD_FLY_TIME));
+        s.Insert(timeNode, gameObject.transform.DOMove(new Vector3(spellEffectPos.x, spellEffectPos.y, -3f), GameConfig.F("SPELL_CARD_FLY_TIME")));
+        s.Insert(timeNode, gameObject.transform.DOScale(GameConfig.F("SPELL_CARD_SCALE"), GameConfig.F("SPELL_CARD_FLY_TIME")));
         // 4. Add effect to the card
         cob.AddEffectParticle();
-        timeNode += GameConfig.SPELL_CARD_DISPLAY_TIME + GameConfig.SPELL_CARD_FLY_TIME;
+        timeNode += GameConfig.F("SPELL_CARD_DISPLAY_TIME") + GameConfig.F("SPELL_CARD_FLY_TIME");
         s.InsertCallback(timeNode, () =>
         {
             //new PlaySpellCard(player, cardData).Fire(PlaySpellCardUpdateUI);
@@ -129,8 +129,8 @@ public class DragHandCard : DraggingActions
 
         // 7. Discard card into graveyard
         cob.OriginPos = pob.Grave.transform.position;
-        gameObject.transform.DOMove(cob.OriginPos, GameConfig.BATTLE_CARD_DEATH_FLY_TIME);
-        gameObject.transform.DOScale(1.0f, GameConfig.BATTLE_CARD_DEATH_FLY_TIME);
+        gameObject.transform.DOMove(cob.OriginPos, GameConfig.F("BATTLE_CARD_DEATH_FLY_TIME"));
+        gameObject.transform.DOScale(1.0f, GameConfig.F("BATTLE_CARD_DEATH_FLY_TIME"));
         cob.SetMouseHovering(true);
     }
 

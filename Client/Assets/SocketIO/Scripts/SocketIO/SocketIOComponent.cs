@@ -99,7 +99,7 @@ namespace SocketIO
 			sid = null;
 			packetId = 0;
 
-			ws = new WebSocket(url);
+			ws = new WebSocket("ws://" + GameConfig.S("SERVER") + ":" + GameConfig.S("PORT") + "/socket.io/?EIO=4&transport=websocket");
 			ws.OnOpen += OnOpen;
 			ws.OnMessage += OnMessage;
 			ws.OnError += OnError;
