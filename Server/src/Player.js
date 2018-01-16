@@ -5,6 +5,7 @@ const CardSlot = require('./CardSlot');
 const Card = require('./Card');
 const Deck = require('./Deck');
 const GameData = require('./GameData');
+const CardAbility = require('./cardAbilities/CardAbility');
 
 class Player {
 
@@ -187,29 +188,50 @@ class Player {
     playCardFromHand(guid, slotId) {
         const index = this.findCardByGuid(this.hand, guid);
         const card = this.hand[index];
-        const payload = {
-            guid: guid,
-            goto: -1,
-            mana: this.mana,
-            slotPower: 0
+        const res = {
+            result: false,
+            payloads: []
         };
         if (card.getCost() <= this.mana && this.getRoom().getCurrentPlayer().getName() == this.getName()) {
+            let cardDest = -1;
             if (card.getType() == CardTypes.CREATURE || card.getType() == CardTypes.ENCHANTMENT) {
-                payload.goto = slotId;
+                cardDest = slotId;
                 this.cardSlots[slotId].add(card);
             } else if (card.getType() == CardTypes.SPELL) {
-                // TODO
-                payload.goto = MagicNumbers.TO_GRAVE;
+                const className = "Card" + card.getId();
+                // if (CardAbility.hasOwnProperty(className)) {
+                //     const obj = new CardAbility[className](item);
+                //     obj.doAction();
+                // }
+                cardDest = MagicNumbers.TO_GRAVE;
                 this.grave.push(card);
             } else {
                 console.error(`[E]unknown card type: ${JSON.stringify(card)}`);
             }
             this.hand.splice(index, 1);
             this.mana -= card.getCost();
-            payload.mana = this.mana;
-            payload.slotPower = this.getSlotPower(slotId);
+
+            res.result = true;
+            res.payloads.push({
+                ename: "play_card",
+                payload: {
+                    name: this.getName(),
+                    guid: guid,
+                    goto: cardDest,
+                    mana: this.mana,
+                    slotPower: this.getSlotPower(slotId)
+                }
+            });
+        } else {
+            res.payloads.push({
+                ename: "play_card_fail",
+                payload: {
+                    name: this.getName(),
+                    guid: guid
+                }
+            });
         }
-        return payload;
+        return res;
     }
 
     initDeck() {

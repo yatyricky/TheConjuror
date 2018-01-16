@@ -86,17 +86,19 @@ io.on('connection', (socket) => {
     socket.on('play_card', (data) => {
         console.log(`[I][O]play_card: ${JSON.stringify(data)}`);
         const player = allClients[data.name];
-        const payload = player.playCardFromHand(data.guid, data.slotId);
-        const playData = {
-            name: data.name,
-            payload: payload
-        };
-        if (payload.goto != -1) {
-            io.to(player.getRoom().getId()).emit('play_card', playData);
-            console.log(`[I][B]play_card: ${JSON.stringify(playData)}`);
+        const res = player.playCardFromHand(data.guid, data.slotId);
+        if (res.result === true) {
+            for (let i = 0; i < res.payloads.length; i++) {
+                const element = res.payloads[i];
+                io.to(player.getRoom().getId()).emit(element.ename, element.payload);
+                console.log(`[I][B]${element.ename}: ${JSON.stringify(element.payload)}`);   
+            }
         } else {
-            socket.emit('play_card', playData);
-            console.log(`[I][E]play_card: ${JSON.stringify(playData)}`);
+            for (let i = 0; i < res.payloads.length; i++) {
+                const element = res.payloads[i];
+                socket.emit(element.ename, element.payload);
+                console.log(`[I][E]${element.ename}: ${JSON.stringify(element.payload)}`);   
+            }
         }
     });
 

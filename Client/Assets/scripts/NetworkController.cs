@@ -65,6 +65,7 @@ public class NetworkController : MonoBehaviour
         socket.On("turn_for", TurnForPlayerCallback);
         socket.On("draw_card", PlayerDrawCardsCallback);
         socket.On("play_card", PlayerPlayCardToSlotCallback);
+        socket.On("play_card_fail", PlayerPlayCardToSlotFailedCallback);
         socket.On("update_mana", UpdatePlayerManaCallback);
         socket.On("battle_res", BattleResultCallback);
     }
@@ -158,12 +159,19 @@ public class NetworkController : MonoBehaviour
     {
         Debug.Log("[O]PlayerPlayCardToSlot " + e.ToString());
         string who = e.data.GetField("name").str;
-        JSONObject payload = e.data.GetField("payload");
-        int guid = (int)payload.GetField("guid").n;
-        int dest = (int)payload.GetField("goto").n;
-        int mana = (int)payload.GetField("mana").n;
-        int slotPower = (int)payload.GetField("slotPower").n;
+        int guid = (int)e.data.GetField("guid").n;
+        int dest = (int)e.data.GetField("goto").n;
+        int mana = (int)e.data.GetField("mana").n;
+        int slotPower = (int)e.data.GetField("slotPower").n;
         BoardBehaviour.CrossScenePayloads.Enqueue(new CrossScenePayload(BoardBehaviour.PlayerPlayedACard, who, guid, dest, mana, slotPower));
+    }
+
+    private void PlayerPlayCardToSlotFailedCallback(SocketIOEvent e)
+    {
+        Debug.Log("[O]PlayerPlayCardToSlotFailed: " + e.ToString());
+        string who = e.data.GetField("name").str;
+        int guid = (int)e.data.GetField("guid").n;
+        BoardBehaviour.CrossScenePayloads.Enqueue(new CrossScenePayload(BoardBehaviour.PlayerPlayedACardFailed, who, guid));
     }
 
     #endregion

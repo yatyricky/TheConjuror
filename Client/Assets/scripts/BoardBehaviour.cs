@@ -163,6 +163,18 @@ public class BoardBehaviour : MonoBehaviour
         }
     }
 
+    internal static void PlayerPlayedACardFailed(object[] data)
+    {
+        string who = (string)data[0];
+        int guid = (int)data[1];
+        PlayerObjectBehaviour forPlayer = LocalPlayer;
+        if (who.Equals(EnemyPlayer.PlayerName))
+        {
+            forPlayer = EnemyPlayer;
+        }
+        forPlayer.Hob.PlayCardFail(CardObjectBehaviour.GetCOB(guid).gameObject);
+    }
+
     internal static void UpdatePlayerMana(object[] data)
     {
         string who = (string)data[0];
