@@ -80,9 +80,7 @@ Case 2: game start.
 {
     name: "player name",
     guid: "card guid",
-    goto: "card flies to card slot or grave",
-    mana: "player name",
-    slotPower: "player slot power"
+    mana: "player name"
 }
 ```
 
@@ -163,5 +161,33 @@ Case 2: game start.
         ahp: "attacker after battle health",
         dhp: "defender ~"
     }
+}
+```
+
+## select_target
+
+``` js
+{
+    name: "player name"
+}
+```
+
+## play_card_slot
+
+``` js
+{
+    name: "player name",
+    guid: "card guid",
+    slot: "slot id",
+    power: "slot power"
+}
+```
+
+## discard_card
+
+``` js
+{
+    name: "player name",
+    guid: "card guid"
 }
 ```

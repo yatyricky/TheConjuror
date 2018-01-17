@@ -1,4 +1,5 @@
 const MagicNumbers = require('./constants/MagicNumbers');
+const Events = require('./constants/Events');
 
 class Room {
 
@@ -103,7 +104,7 @@ class Room {
     restoreManaAndAddOne() {
         this.currentPlayer.turnAddMana();
         return [{
-            ename: "update_mana",
+            ename: Events.UPDATE_MANA,
             payload: {
                 name: this.currentPlayer.getName(),
                 mana: this.currentPlayer.getMana()
@@ -118,7 +119,7 @@ class Room {
             const cardsData = this.currentPlayer.drawRandom(1, true);
             const deckSize = this.currentPlayer.getDeck().size();
             ret.push({
-                ename: "draw_card",
+                ename: Events.DRAW_CARD,
                 payload: {
                     name: this.currentPlayer.getName(),
                     cards: cardsData,
@@ -134,7 +135,7 @@ class Room {
             let cardsData = this.player1.drawRandom(num, true);
             let deckSize = this.player1.getDeck().size();
             ret.push({
-                ename: "draw_card",
+                ename: Events.DRAW_CARD,
                 payload: {
                     name: this.player1.getName(),
                     cards: cardsData,
@@ -148,7 +149,7 @@ class Room {
             cardsData = this.player2.drawRandom(num, true);
             deckSize = this.player2.getDeck().size();
             ret.push({
-                ename: "draw_card",
+                ename: Events.DRAW_CARD,
                 payload: {
                     name: this.player2.getName(),
                     cards: cardsData,
@@ -168,7 +169,7 @@ class Room {
         }
         this.currentPlayer.restoreSlotAttackCharges();
         return [{
-            ename: "turn_for",
+            ename: Events.TURN_FOR,
             payload: {
                 name: this.currentPlayer.getName()
             }
@@ -179,7 +180,7 @@ class Room {
         if (player == this.currentPlayer) {
             if (player.canAttackWithSlot(from)) {
                 return [{
-                    ename: "battle_res",
+                    ename: Events.BATTLE_RES,
                     payload: {
                         res: player.attack(this.getOpponent(player), from, to)
                     }

@@ -28,7 +28,7 @@ public class CardSlotBehaviour : MonoBehaviour
         cardObjs = new List<GameObject>();
     }
 
-    internal void RerenderCards(Sequence s, float t)
+    internal void RerenderCards()
     {
         if (cardObjs.Count > 0)
         {
@@ -46,13 +46,17 @@ public class CardSlotBehaviour : MonoBehaviour
 
             for (int i = 0; i < cardObjs.Count; i++)
             {
-                Vector3 pos = new Vector3(basePos.x + i * margin, basePos.y, (i + 1) * -0.01f - 1f);
-                GameObject item = cardObjs.ElementAt(i);
-                s.Insert(t, item.transform.DOMove(pos, GameConfig.F("CARD_SLOT_RENDER_MOVE_TIME")));
-                s.Insert(t, item.transform.DOScale(1.0f, GameConfig.F("CARD_SLOT_RENDER_MOVE_TIME")));
-                item.GetComponent<CardObjectBehaviour>().OriginPos = pos;
+                CardObjectBehaviour cob = cardObjs.ElementAt(i).GetComponent<CardObjectBehaviour>();
+                cob.OriginPos = new Vector3(basePos.x + i * margin, basePos.y, (i + 1) * -0.01f - 1f);
 
-                item.SetActive(true);
+                cob.SetTweening(true);
+                Sequence s = DOTween.Sequence();
+                s.Insert(0f, cob.gameObject.transform.DOMove(cob.OriginPos, GameConfig.F("CARD_SLOT_RENDER_MOVE_TIME")));
+                s.Insert(0f, cob.gameObject.transform.DOScale(1.0f, GameConfig.F("CARD_SLOT_RENDER_MOVE_TIME")));
+                s.OnComplete(() =>
+                {
+                    cob.SetTweening(false);
+                });
             }
         }
     }
@@ -62,11 +66,11 @@ public class CardSlotBehaviour : MonoBehaviour
         Glow.SetActive(v);
     }
 
-    internal void AddCard(GameObject co, Sequence s, float t)
+    internal void AddCard(GameObject co)
     {
         cardObjs.Add(co);
         co.GetComponent<CardObjectBehaviour>().State = CardState.SLOT;
-        RerenderCards(s, t);
+        RerenderCards();
     }
 
     public void UpdatePower(int v)

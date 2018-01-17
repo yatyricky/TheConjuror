@@ -1,14 +1,24 @@
-﻿class Card1000123 {
+﻿const Events = require('../constants/Events');
+
+class Card1000123 {
 
     constructor(card) {
         this.card = card;
+        this.effectCallback = this.doEffect.bind(this);
     }
 
-    doAction(player, callBack) {
+    doEffect() {
+
     }
 
-    getBattleModifier(isAttacker) {
-        return 0;
+    doAction(player) {
+        player.pushSelectAction(this.effectCallback);
+        return {
+            ename: Events.SELECT_TARGET,
+            payload: {
+                name: player.getName()
+            }
+        };
     }
 
 }

@@ -2,6 +2,7 @@
 using SocketIO;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
+using System;
 
 public class NetworkController : MonoBehaviour
 {
@@ -60,19 +61,22 @@ public class NetworkController : MonoBehaviour
 
         GameObject go = GameObject.Find("SocketIO");
         socket = go.GetComponent<SocketIOComponent>();
-        socket.On("connection_established", ConnectionSuccess);
-        socket.On("login", LoginResult);
-        socket.On("turn_for", TurnForPlayerCallback);
-        socket.On("draw_card", PlayerDrawCardsCallback);
-        socket.On("play_card", PlayerPlayCardToSlotCallback);
-        socket.On("play_card_fail", PlayerPlayCardToSlotFailedCallback);
-        socket.On("update_mana", UpdatePlayerManaCallback);
-        socket.On("battle_res", BattleResultCallback);
+        socket.On("connection_established", ConnectionEstablishedCallback);
+        socket.On("login", LoginCallback);
+        socket.On("turn_for", TurnForCallback);
+        socket.On("draw_card", DrawCardCallback);
+        socket.On("play_card", PlayCardCallback);
+        socket.On("play_card_fail", PlayCardFailCallback);
+        socket.On("update_mana", UpdateManaCallback);
+        socket.On("battle_res", BattleResCallback);
+        socket.On("select_target", SelectTargetCallback);
+        socket.On("play_card_slot", PlayCardSlotCallback);
+        socket.On("discard_card", DiscardCardCallback);
     }
 
     #region Connection and Login
 
-    private void ConnectionSuccess(SocketIOEvent e)
+    private void ConnectionEstablishedCallback(SocketIOEvent e)
     {
         Debug.Log("[O]Connected to server");
         messageOverlay.Hide();
@@ -82,7 +86,7 @@ public class NetworkController : MonoBehaviour
         socket.Emit("login", data);
     }
 
-    private void LoginResult(SocketIOEvent e)
+    private void LoginCallback(SocketIOEvent e)
     {
         Debug.Log("[O]Login result received: " + e.data);
         if (e.data.GetField("cmd").str.Equals("wait"))
@@ -92,7 +96,7 @@ public class NetworkController : MonoBehaviour
         else if (e.data.GetField("cmd").str.Equals("start"))
         {
             // Get start data
-            BoardBehaviour.CrossScenePayloads.Enqueue(new CrossScenePayload (BoardBehaviour.FirstLoadDataCallback, e.data));
+            BoardBehaviour.CrossScenePayloads.Enqueue(new CrossScenePayload(BoardBehaviour.FirstLoadDataCallback, e.data));
             // Switch to game scene
             Scene s = SceneManager.GetSceneByBuildIndex(1);
             SceneManager.LoadScene(1);
@@ -111,7 +115,7 @@ public class NetworkController : MonoBehaviour
 
     #region Turn For Player
 
-    private void TurnForPlayerCallback(SocketIOEvent e)
+    private void TurnForCallback(SocketIOEvent e)
     {
         BoardBehaviour.CurrentPlayerName = e.data.GetField("name").str;
     }
@@ -120,7 +124,7 @@ public class NetworkController : MonoBehaviour
 
     #region Draw Cards
 
-    private void PlayerDrawCardsCallback(SocketIOEvent e)
+    private void DrawCardCallback(SocketIOEvent e)
     {
         Debug.Log("[O]PlayerDrawCards " + e.ToString());
         string who = e.data.GetField("name").str;
@@ -155,23 +159,21 @@ public class NetworkController : MonoBehaviour
         socket.Emit("play_card", data);
     }
 
-    private void PlayerPlayCardToSlotCallback(SocketIOEvent e)
+    private void PlayCardCallback(SocketIOEvent e)
     {
         Debug.Log("[O]PlayerPlayCardToSlot " + e.ToString());
         string who = e.data.GetField("name").str;
         int guid = (int)e.data.GetField("guid").n;
-        int dest = (int)e.data.GetField("goto").n;
         int mana = (int)e.data.GetField("mana").n;
-        int slotPower = (int)e.data.GetField("slotPower").n;
-        BoardBehaviour.CrossScenePayloads.Enqueue(new CrossScenePayload(BoardBehaviour.PlayerPlayedACard, who, guid, dest, mana, slotPower));
+        BoardBehaviour.CrossScenePayloads.Enqueue(new CrossScenePayload(BoardBehaviour.PlayCardCallback, who, guid, mana));
     }
 
-    private void PlayerPlayCardToSlotFailedCallback(SocketIOEvent e)
+    private void PlayCardFailCallback(SocketIOEvent e)
     {
         Debug.Log("[O]PlayerPlayCardToSlotFailed: " + e.ToString());
         string who = e.data.GetField("name").str;
         int guid = (int)e.data.GetField("guid").n;
-        BoardBehaviour.CrossScenePayloads.Enqueue(new CrossScenePayload(BoardBehaviour.PlayerPlayedACardFailed, who, guid));
+        BoardBehaviour.CrossScenePayloads.Enqueue(new CrossScenePayload(BoardBehaviour.PlayCardFailCallback, who, guid));
     }
 
     #endregion
@@ -189,7 +191,7 @@ public class NetworkController : MonoBehaviour
 
     #region Update Player Mana
 
-    private void UpdatePlayerManaCallback(SocketIOEvent e)
+    private void UpdateManaCallback(SocketIOEvent e)
     {
         string who = e.data.GetField("name").str;
         int mana = (int)e.data.GetField("mana").n;
@@ -209,7 +211,7 @@ public class NetworkController : MonoBehaviour
         socket.Emit("attack_slot", data);
     }
 
-    private void BattleResultCallback(SocketIOEvent e)
+    private void BattleResCallback(SocketIOEvent e)
     {
         JSONObject res = e.data.GetField("res");
         string aname = res.GetField("aname").str;
@@ -234,6 +236,39 @@ public class NetworkController : MonoBehaviour
         int dhp = (int)res.GetField("dhp").n;
 
         BoardBehaviour.CrossScenePayloads.Enqueue(new CrossScenePayload(BoardBehaviour.BattleResult, aname, dname, amods, dmods, aoap, doap, akilled, atouched, dkilled, dtouched, ahit, dhit, abattle, bbattle, aaap, daap, acs, dcs, ahp, dhp));
+    }
+
+    #endregion
+
+    #region Select Target
+
+    private void SelectTargetCallback(SocketIOEvent e)
+    {
+        Debug.Log("Should be selecting a target now");
+    }
+
+    #endregion
+
+    #region Discard Card
+
+    private void DiscardCardCallback(SocketIOEvent e)
+    {
+        string who = e.data.GetField("name").str;
+        int guid = (int)e.data.GetField("guid").n;
+        BoardBehaviour.CrossScenePayloads.Enqueue(new CrossScenePayload(BoardBehaviour.DiscardCardCallback, who, guid));
+    }
+
+    #endregion
+
+    #region Play Card Slot
+
+    private void PlayCardSlotCallback(SocketIOEvent e)
+    {
+        string who = e.data.GetField("name").str;
+        int guid = (int)e.data.GetField("guid").n;
+        int slot = (int)e.data.GetField("slot").n;
+        int power = (int)e.data.GetField("power").n;
+        BoardBehaviour.CrossScenePayloads.Enqueue(new CrossScenePayload(BoardBehaviour.PlayCardSlotCallback, who, guid, slot, power));
     }
 
     #endregion

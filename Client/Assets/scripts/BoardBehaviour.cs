@@ -138,7 +138,17 @@ public class BoardBehaviour : MonoBehaviour
         }
     }
 
-    internal static void PlayerPlayedACard(object[] data)
+    private static PlayerObjectBehaviour ForPlayer(string name)
+    {
+        PlayerObjectBehaviour ret = LocalPlayer;
+        if (name.Equals(EnemyPlayer.PlayerName))
+        {
+            ret = EnemyPlayer;
+        }
+        return ret;
+    }
+
+    internal static void PlayCardCallback(object[] data)
     {
         string who = (string)data[0];
         PlayerObjectBehaviour forPlayer = LocalPlayer;
@@ -147,42 +157,30 @@ public class BoardBehaviour : MonoBehaviour
             forPlayer = EnemyPlayer;
         }
         int guid = (int)data[1];
-        int dest = (int)data[2];
-        int mana = (int)data[3];
+        int mana = (int)data[2];
         CardObjectBehaviour cob = CardObjectBehaviour.GetCOB(guid);
-        DragHandCard dhc = cob.gameObject.GetComponent<DragHandCard>();
+        forPlayer.Hob.RemoveCard(cob.gameObject);
+        forPlayer.UpdateMana(mana);
+        cob.gameObject.GetComponent<DragHandCard>().CanDrag = false;
 
-        Sequence s = DOTween.Sequence();
-        float t = 0f;
-        // Move card to neutral position and play effects
-        Vector3 spellEffectPos = NeutralBattlePoint.transform.position;
-        s.Insert(t, cob.gameObject.transform.DOMove(new Vector3(spellEffectPos.x, spellEffectPos.y, -3f), GameConfig.F("SPELL_CARD_FLY_TIME")));
-        s.Insert(t, cob.gameObject.transform.DOScale(GameConfig.F("SPELL_CARD_SCALE"), GameConfig.F("SPELL_CARD_FLY_TIME")));
-        cob.AddEffectParticle();
-
-        t += GameConfig.F("SPELL_CARD_FLY_TIME") + GameConfig.F("SPELL_CARD_DISPLAY_TIME");
-
-        if (dest == 99)
+        cob.AddDoTweens(() =>
         {
-            // Played a spell card
-            forPlayer.UpdateMana(mana);
-            forPlayer.Hob.RemoveCard(cob.gameObject);
-            forPlayer.DiscardCard(cob.gameObject, s, t);
-            dhc.CanDrag = false;
-        }
-        else
-        {
-            // played a creture/enchantment card
-            int slotPower = (int)data[4];
-            forPlayer.UpdateCardSlotPower(dest, slotPower);
-            forPlayer.UpdateMana(mana);
-            forPlayer.Hob.RemoveCard(cob.gameObject);
-            forPlayer.CSob[dest].AddCard(cob.gameObject, s, t);
-            dhc.CanDrag = false;
-        }
+            // Move card to neutral position and play effects
+            Vector3 spellEffectPos = NeutralBattlePoint.transform.position;
+            cob.AddEffectParticle();
+            cob.SetTweening(true);
+            Sequence s = DOTween.Sequence();
+            s.Insert(0f, cob.gameObject.transform.DOMove(new Vector3(spellEffectPos.x, spellEffectPos.y, -3f), GameConfig.F("SPELL_CARD_FLY_TIME")));
+            s.Insert(0f, cob.gameObject.transform.DOScale(GameConfig.F("SPELL_CARD_SCALE"), GameConfig.F("SPELL_CARD_FLY_TIME")));
+            s.AppendInterval(GameConfig.F("SPELL_CARD_FLY_TIME") + GameConfig.F("SPELL_CARD_DISPLAY_TIME"));
+            s.OnComplete(() => 
+            {
+                cob.SetTweening(false);
+            });
+        });
     }
 
-    internal static void PlayerPlayedACardFailed(object[] data)
+    internal static void PlayCardFailCallback(object[] data)
     {
         string who = (string)data[0];
         int guid = (int)data[1];
@@ -453,23 +451,54 @@ public class BoardBehaviour : MonoBehaviour
                 CardObjectBehaviour cob = CardObjectBehaviour.GetCOB(item.guid);
                 cob.UpdatePower(item.power);
             }
-        });
 
-        if (aname.Equals(LocalPlayer.PlayerName))
-        {
-            LocalPlayer.CSob[acs].RerenderCards(s, endTimeNode);
-            EnemyPlayer.CSob[dcs].RerenderCards(s, endTimeNode);
-        }
-        else if (dname.Equals(LocalPlayer.PlayerName))
-        {
-            EnemyPlayer.CSob[acs].RerenderCards(s, endTimeNode);
-            LocalPlayer.CSob[dcs].RerenderCards(s, endTimeNode);
-        }
+            if (aname.Equals(LocalPlayer.PlayerName))
+            {
+                LocalPlayer.CSob[acs].RerenderCards();
+                EnemyPlayer.CSob[dcs].RerenderCards();
+            }
+            else if (dname.Equals(LocalPlayer.PlayerName))
+            {
+                EnemyPlayer.CSob[acs].RerenderCards();
+                LocalPlayer.CSob[dcs].RerenderCards();
+            }
+        });
 
         s.OnComplete(() =>
         {
             SetUIState(UIState.ACTION);
         });
 
+    }
+
+    internal static void PlayCardSlotCallback(object[] data)
+    {
+        PlayerObjectBehaviour p = ForPlayer((string)data[0]);
+        CardObjectBehaviour cob = CardObjectBehaviour.GetCOB((int)data[1]);
+        int slot = (int)data[2];
+        int power = (int)data[3];
+        cob.AddDoTweens(() =>
+        {
+            p.UpdateCardSlotPower(slot, power);
+            p.CSob[slot].AddCard(cob.gameObject);
+        });
+    }
+
+    internal static void DiscardCardCallback(object[] data)
+    {
+        PlayerObjectBehaviour p = ForPlayer((string)data[0]);
+        CardObjectBehaviour cob = CardObjectBehaviour.GetCOB((int)data[1]);
+        cob.AddDoTweens(() =>
+        {
+            cob.OriginPos = p.Grave.transform.position;
+            cob.SetTweening(true);
+            Sequence s = DOTween.Sequence();
+            s.Insert(0f, cob.gameObject.transform.DOMove(cob.OriginPos, GameConfig.F("BATTLE_CARD_DEATH_FLY_TIME")));
+            s.Insert(0f, cob.gameObject.transform.DOScale(1.0f, GameConfig.F("BATTLE_CARD_DEATH_FLY_TIME")));
+            s.OnComplete(() =>
+            {
+                cob.SetTweening(false);
+            });
+        });
     }
 }

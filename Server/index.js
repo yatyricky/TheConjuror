@@ -1,3 +1,4 @@
+const Events = require('./src/constants/Events');
 const Room = require('./src/Room');
 const Player = require('./src/Player');
 const GameData = require('./src/GameData');
@@ -13,7 +14,7 @@ const allRooms = [];
 const allClients = {};
 
 io.on('connection', (socket) => {
-    socket.emit('connection_established');
+    socket.emit(Events.CONNECTION_ESTABLISHED);
     console.log('[I][E]New client connected: ' + socket.id);
 
     socket.on('login', (data) => {
@@ -39,7 +40,7 @@ io.on('connection', (socket) => {
         const stillEmpty = room.playerJoin(player);
         socket.join(room.getId());
         if (stillEmpty) {
-            socket.emit('login', {
+            socket.emit(Events.LOGIN, {
                 cmd: 'wait'
             });
             console.log('[I][E]login: wait');
@@ -49,7 +50,7 @@ io.on('connection', (socket) => {
                 const payloads = room.start();
                 const p1 = room.p1();
                 const p2 = room.p2();
-                io.to(room.getId()).emit('login', {
+                io.to(room.getId()).emit(Events.LOGIN, {
                     cmd: 'start',
                     players: {
                         p1: p1.getUIData(),

@@ -1,4 +1,6 @@
-﻿class Card1000028 {
+﻿const Events = require('../constants/Events');
+
+class Card1000028 {
 
     constructor(card) {
         this.card = card;
@@ -8,7 +10,7 @@
         const cards = player.drawRandom(1, true);
         const deckN = player.getDeck().size();
         return {
-            ename: "draw_card",
+            ename: Events.DRAW_CARD,
             payload: {
                 name: player.getName(),
                 cards: cards,

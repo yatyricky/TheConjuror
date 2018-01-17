@@ -32,6 +32,8 @@ public class CardObjectBehaviour : MonoBehaviour
     private bool mouseHovering;
     private bool canMouseHover;
     private bool isExpanding;
+    private Queue<Action> doTweens;
+    private bool tweening;
 
     public Vector3 OriginPos {get{ return originPos; } set { originPos = value;}}
     public PlayerObjectBehaviour Owner {get { return owner; }set { owner = value; }}
@@ -108,7 +110,9 @@ public class CardObjectBehaviour : MonoBehaviour
     private void Awake()
     {
         mouseHovering = false;
+        tweening = false;
         SetMouseHovering(true);
+        doTweens = new Queue<Action>();
     }
 
     private void OnMouseOver()
@@ -151,6 +155,12 @@ public class CardObjectBehaviour : MonoBehaviour
                 BoardBehaviour.SelectTarget(gameObject);
             }
         }
+    }
+
+    internal void SetTweening(bool v)
+    {
+        gameObject.GetComponent<DragHandCard>().CanDrag = v;
+        tweening = v;
     }
 
     public void AddEffectParticle()
@@ -211,5 +221,25 @@ public class CardObjectBehaviour : MonoBehaviour
     internal void UpdatePower(int val)
     {
         CardPower.text = val.ToString();
+    }
+
+    internal void AddDoTweens(Action act)
+    {
+        doTweens.Enqueue(act);
+    }
+
+    private void Update()
+    {
+        while (doTweens.Count > 0)
+        {
+            if (!tweening)
+            {
+                doTweens.Dequeue()();
+            }
+            else
+            {
+                break;
+            }
+        }
     }
 }

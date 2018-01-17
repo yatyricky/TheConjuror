@@ -1,4 +1,5 @@
-﻿const Colors = require('./constants/Colors');
+﻿const Events = require('./constants/Events');
+const Colors = require('./constants/Colors');
 const CardTypes = require('./constants/CardTypes');
 const MagicNumbers = require('./constants/MagicNumbers');
 const CardSlot = require('./CardSlot');
@@ -26,6 +27,7 @@ class Player {
         this.maxMana = 0;
         this.mana = this.maxMana;
         this.room = null;
+        this.selectActionStack = [];
     }
 
     getName() {
@@ -42,6 +44,10 @@ class Player {
             hp: this.health,
             mp: this.mana
         }
+    }
+
+    pushSelectAction(callback) {
+        this.selectActionStack.push(callback);
     }
 
     checkBuffsEndTurn(caster) {
@@ -193,11 +199,39 @@ class Player {
             payloads: []
         };
         if (card.getCost() <= this.mana && this.getRoom().getCurrentPlayer().getName() == this.getName()) {
-            let cardDest = -1;
+            this.hand.splice(index, 1);
+            this.mana -= card.getCost();
+            res.result = true;
+            res.payloads.push({
+                ename: Events.PLAY_CARD,
+                payload: {
+                    name: this.getName(),
+                    guid: guid,
+                    mana: this.mana
+                }
+            });
+
             if (card.getType() == CardTypes.CREATURE || card.getType() == CardTypes.ENCHANTMENT) {
-                cardDest = slotId;
                 this.cardSlots[slotId].add(card);
+                res.payloads.push({
+                    ename: Events.PLAY_CARD_SLOT,
+                    payload: {
+                        name: this.getName(),
+                        guid: guid,
+                        slot: slotId,
+                        power: this.getSlotPower(slotId)
+                    }
+                });
             } else if (card.getType() == CardTypes.SPELL) {
+                this.grave.push(card);
+                res.payloads.push({
+                    ename: Events.DISCARD_CARD,
+                    payload: {
+                        name: this.getName(),
+                        guid: guid
+                    }
+                });
+                
                 const className = "Card" + card.getId();
                 if (CardAbility.hasOwnProperty(className)) {
                     const obj = new CardAbility[className](card);
@@ -210,28 +244,12 @@ class Player {
                         console.error(`[E]Player.playCardFromHand: ${className} has not defined doAction`);
                     }
                 }
-                cardDest = MagicNumbers.TO_GRAVE;
-                this.grave.push(card);
             } else {
                 console.error(`[E]unknown card type: ${JSON.stringify(card)}`);
             }
-            this.hand.splice(index, 1);
-            this.mana -= card.getCost();
-
-            res.result = true;
-            res.payloads.push({
-                ename: "play_card",
-                payload: {
-                    name: this.getName(),
-                    guid: guid,
-                    goto: cardDest,
-                    mana: this.mana,
-                    slotPower: this.getSlotPower(slotId)
-                }
-            });
         } else {
             res.payloads.push({
-                ename: "play_card_fail",
+                ename: Events.PLAY_CARD_FAIL,
                 payload: {
                     name: this.getName(),
                     guid: guid
