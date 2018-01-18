@@ -145,8 +145,6 @@ class CardSlot {
                             });
                             sum += mod;
                         }
-                    } else {
-                        console.error(`[E]CardSlot.getModifiers: ${className} has not defined getBattleModifier`);
                     }
                 }
             }

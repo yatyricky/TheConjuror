@@ -143,34 +143,32 @@ Case 2: game start.
 
 ``` js
 {
-    res: {
-        amods: [{ // attacker cards modifiers
-            guid: "card guid",
-            mod: "card battle power modifier"
-        }],
-        dmods: [{ // defender ~
-            guid: "card guid",
-            mod: "card battle power modifier"
-        }],
-        aoap: "attacker original power",
-        doap: "defender ~",
-        abattle: [{ /* attacker battling cards */ }],
-        bbattle: [{ /* defender ~ */ }],
-        aaap: "attacker after battle power",
-        daap: "defender ~",
-        akilled: [{ /* attacker battle killed cards */ }],
-        dkilled: [{ /* defender ~ */ }],
-        atouched: [{ /* attacker battle damaged cards */ }],
-        dtouched: [{ /* defender ~ */ }],
-        ahit: "attacker taken damage",
-        dhit: "defender ~",
-        aname: "attacker name",
-        dname: "defender ~",
-        acs: "attacker card slot",
-        dcs: "defender ~",
-        ahp: "attacker after battle health",
-        dhp: "defender ~"
-    }
+    amods: [{ // attacker cards modifiers
+        guid: "card guid",
+        mod: "card battle power modifier"
+    }],
+    dmods: [{ // defender ~
+        guid: "card guid",
+        mod: "card battle power modifier"
+    }],
+    aoap: "attacker original power",
+    doap: "defender ~",
+    abattle: [{ /* attacker battling cards */ }],
+    bbattle: [{ /* defender ~ */ }],
+    aaap: "attacker after battle power",
+    daap: "defender ~",
+    akilled: [{ /* attacker battle killed cards */ }],
+    dkilled: [{ /* defender ~ */ }],
+    atouched: [{ /* attacker battle damaged cards */ }],
+    dtouched: [{ /* defender ~ */ }],
+    ahit: "attacker taken damage",
+    dhit: "defender ~",
+    aname: "attacker name",
+    dname: "defender ~",
+    acs: "attacker card slot",
+    dcs: "defender ~",
+    ahp: "attacker after battle health",
+    dhp: "defender ~"
 }
 ```
 

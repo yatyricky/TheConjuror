@@ -200,12 +200,7 @@ class Room {
     playerAttackSlot(player, from, to) {
         if (player == this.currentPlayer) {
             if (player.canAttackWithSlot(from)) {
-                return [{
-                    ename: Events.BATTLE_RES,
-                    payload: {
-                        res: player.attack(this.getOpponent(player), from, to)
-                    }
-                }];
+                return player.attack(this.getOpponent(player), from, to);
             } else {
                 console.log(`[I]player ${player.getName()} cant attack`);
                 return [];

@@ -72,6 +72,7 @@ class Player {
     }
 
     attack(defender, acs, dcs) {
+        let ret = [];
         let res = {};
 
         // reduce slot attack charges by 1
@@ -100,22 +101,22 @@ class Player {
         res.akilled = [];
         for (let i = 0; i < admgRes.killed.length; i++) {
             const element = admgRes.killed[i];
-            this.grave.push(element);
+            ret = ret.concat(this.cardEnterGrave(element));
             res.akilled.push(element.getData());
         }
         res.atouched = [];
         for (let i = 0; i < admgRes.touched.length; i++) {
-            res.atouched.push(admgRes.touched[i]);
+            res.atouched.push(admgRes.touched[i].getData());
         }
         res.dkilled = [];
         for (let i = 0; i < ddmgRes.killed.length; i++) {
             const element = ddmgRes.killed[i];
-            defender.grave.push(element);
+            ret = ret.concat(defender.cardEnterGrave(element));
             res.dkilled.push(element.getData());
         }
         res.dtouched = [];
         for (let i = 0; i < ddmgRes.touched.length; i++) {
-            res.dtouched.push(ddmgRes.touched[i]);
+            res.dtouched.push(ddmgRes.touched[i].getData());
         }
         res.ahit = 0;
         res.dhit = 0;
@@ -134,7 +135,11 @@ class Player {
         }
         res.ahp = this.health;
         res.dhp = defender.health;
-        return res;
+        ret.push({
+            ename: Events.BATTLE_RES,
+            payload: res
+        });
+        return ret;
     }
 
     takeDamage(v) {
@@ -303,7 +308,7 @@ class Player {
                                 // Target spells
                             } else {
                                 // Normal spells
-                                this.grave.push(card);
+                                this.cardEnterGrave(card);
                                 res.payloads.push({
                                     ename: Events.DISCARD_CARD,
                                     payload: {
@@ -332,6 +337,27 @@ class Player {
             });
         }
         return res;
+    }
+
+    cardEnterGrave(card) {
+        const ret = [];
+        this.grave.push(card);
+        const className = "Card" + card.getId();
+        if (CardAbility.hasOwnProperty(className)) {
+            const obj = new CardAbility[className](card);
+            if (CardAbility[className].prototype.hasOwnProperty("onEnterGrave")) {
+                const resp = obj.onEnterGrave(this);
+                if (resp !== undefined && resp.hasOwnProperty("ename")) {
+                    ret.push(resp);
+                    if (resp.ename == Events.SELECT_TARGET || resp.ename == Events.SELECT_SLOT) {
+                        // Target death
+                    } else {
+                        // Normal death
+                    }
+                }
+            }
+        }
+        return ret;
     }
 
     initDeck() {

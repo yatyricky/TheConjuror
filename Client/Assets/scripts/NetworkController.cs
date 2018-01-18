@@ -219,27 +219,26 @@ public class NetworkController : MonoBehaviour
 
     private void BattleResCallback(SocketIOEvent e)
     {
-        JSONObject res = e.data.GetField("res");
-        string aname = res.GetField("aname").str;
-        string dname = res.GetField("dname").str;
-        List<BattleCardModifier> amods = JSONListToBCMList(res.GetField("amods").list);
-        List<BattleCardModifier> dmods = JSONListToBCMList(res.GetField("dmods").list);
-        int aoap = (int)res.GetField("aoap").n;
-        int doap = (int)res.GetField("doap").n;
-        List<Card> abattle = JSONListToCardList(res.GetField("abattle").list);
-        List<Card> bbattle = JSONListToCardList(res.GetField("bbattle").list);
-        List<Card> akilled = JSONListToCardList(res.GetField("akilled").list);
-        List<Card> atouched = JSONListToCardList(res.GetField("atouched").list);
-        List<Card> dkilled = JSONListToCardList(res.GetField("dkilled").list);
-        List<Card> dtouched = JSONListToCardList(res.GetField("dtouched").list);
-        int ahit = (int)res.GetField("ahit").n;
-        int dhit = (int)res.GetField("dhit").n;
-        int aaap = (int)res.GetField("aaap").n;
-        int daap = (int)res.GetField("daap").n;
-        int acs = (int)res.GetField("acs").n;
-        int dcs = (int)res.GetField("dcs").n;
-        int ahp = (int)res.GetField("ahp").n;
-        int dhp = (int)res.GetField("dhp").n;
+        string aname = e.data.GetField("aname").str;
+        string dname = e.data.GetField("dname").str;
+        List<BattleCardModifier> amods = JSONListToBCMList(e.data.GetField("amods").list);
+        List<BattleCardModifier> dmods = JSONListToBCMList(e.data.GetField("dmods").list);
+        int aoap = (int)e.data.GetField("aoap").n;
+        int doap = (int)e.data.GetField("doap").n;
+        List<Card> abattle = JSONListToCardList(e.data.GetField("abattle").list);
+        List<Card> bbattle = JSONListToCardList(e.data.GetField("bbattle").list);
+        List<Card> akilled = JSONListToCardList(e.data.GetField("akilled").list);
+        List<Card> atouched = JSONListToCardList(e.data.GetField("atouched").list);
+        List<Card> dkilled = JSONListToCardList(e.data.GetField("dkilled").list);
+        List<Card> dtouched = JSONListToCardList(e.data.GetField("dtouched").list);
+        int ahit = (int)e.data.GetField("ahit").n;
+        int dhit = (int)e.data.GetField("dhit").n;
+        int aaap = (int)e.data.GetField("aaap").n;
+        int daap = (int)e.data.GetField("daap").n;
+        int acs = (int)e.data.GetField("acs").n;
+        int dcs = (int)e.data.GetField("dcs").n;
+        int ahp = (int)e.data.GetField("ahp").n;
+        int dhp = (int)e.data.GetField("dhp").n;
 
         BoardBehaviour.CrossScenePayloads.Enqueue(new CrossScenePayload(BoardBehaviour.BattleResult, aname, dname, amods, dmods, aoap, doap, akilled, atouched, dkilled, dtouched, ahit, dhit, abattle, bbattle, aaap, daap, acs, dcs, ahp, dhp));
     }
