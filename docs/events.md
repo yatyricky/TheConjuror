@@ -168,7 +168,8 @@ Case 2: game start.
 
 ``` js
 {
-    name: "player name"
+    name: "player name",
+    guid: "card guid"
 }
 ```
 
@@ -189,5 +190,34 @@ Case 2: game start.
 {
     name: "player name",
     guid: "card guid"
+}
+```
+
+## select_done
+
+``` js
+{
+    name: "player name"
+}
+```
+
+## add_buff
+
+``` js
+{
+    guid: "card guid",
+    buff: {
+        guid: "buff guid",
+        icon: "buff icon"
+    }
+}
+```
+
+## remove_buff
+
+``` js
+{
+    cguid: "card guid",
+    bguid: "buff guid"
 }
 ```

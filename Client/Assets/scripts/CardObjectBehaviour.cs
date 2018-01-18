@@ -103,6 +103,7 @@ public class CardObjectBehaviour : MonoBehaviour
         }
         else
         {
+            Debug.LogError(Environment.StackTrace);
             throw new Exception("No such card in the game, id: " + id);
         }
     }
@@ -168,19 +169,6 @@ public class CardObjectBehaviour : MonoBehaviour
         GameObject co = Instantiate(Resources.Load("prefabs/CardEffectParticle")) as GameObject;
         co.transform.position = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y, -5f);
         co.transform.SetParent(gameObject.transform);
-    }
-
-    internal bool CanBattle()
-    {
-        bool can = true;
-        foreach(GameObject bo in buffs)
-        {
-            if (bo.GetComponent<BuffBehaviour>().BuffData.Type == Buff.BuffType.NO_BATTLE)
-            {
-                can = false;
-            }
-        }
-        return can;
     }
 
     public void SetMouseHovering(bool canMouseHover)

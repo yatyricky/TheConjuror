@@ -1,4 +1,6 @@
 ﻿const GameData = require('./GameData');
+const BuffTypes = require('./constants/BuffTypes');
+const Events = require('./constants/Events');
 
 let guid = 0;
 
@@ -24,6 +26,13 @@ class Card {
 
     addBuff(buff) {
         this.buffs.push(buff);
+        return {
+            ename: Events.ADD_BUFF,
+            payload: {
+                guid: this.guid,
+                buff: buff.getData()
+            }
+        };
     }
 
     getGuid() {
@@ -61,12 +70,10 @@ class Card {
 
     canBattle() {
         let can = true;
-        for (let i = 0; i < this.buffs.length; i++) {
-            // TODO
-            // const element = this.buffs[i];
-            // if (element.Type == Buff.BuffType.NO_BATTLE) {
-            //     can = false;
-            // }
+        for (let i = 0; i < this.buffs.length && can == true; i++) {
+            if (this.buffs[i].getType() == BuffTypes.NO_BATTLE) {
+                can = false;
+            }
         }
         return can;
     }
@@ -76,20 +83,27 @@ class Card {
     }
 
     checkBuffsEndTurn(caster) {
+        let ret = [];
         for (let i = 0; i < this.buffs.length; i ++) {
-            // TODO
-            // const item = this.buffs[i];
-            // if (item.ShouldRemoveEndTurn() && caster == item.Caster) {
-            //     RemoveBuff(item);
-            //     i--;
-            // }
+            const item = this.buffs[i];
+            if (item.shouldFadeEndTurn() && caster == item.getCaster()) {
+                this.removeBuff(item);
+                ret = ret.concat([{
+                    ename: Events.REMOVE_BUFF,
+                    payload: {
+                        cguid: this.guid,
+                        bguid: item.getData().guid
+                    }
+                }]);
+                i--;
+            }
         }
+        return ret;
     }
 
     removeBuff(buff) {
-        // TODO
-        // this.buffs.Remove(buff);
-        // COB.RemoveBuff(buff.BO);
+        const index = this.buffs.indexOf(buff);
+        this.buffs.splice(index, 1);
     }
 }
 

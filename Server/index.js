@@ -91,14 +91,35 @@ io.on('connection', (socket) => {
         if (res.result === true) {
             for (let i = 0; i < res.payloads.length; i++) {
                 const element = res.payloads[i];
-                io.to(player.getRoom().getId()).emit(element.ename, element.payload);
-                console.log(`[I][B]${element.ename}: ${JSON.stringify(element.payload)}`);   
+                if (element.ename == Events.SELECT_TARGET) {
+                    socket.emit(element.ename, element.payload);
+                    console.log(`[I][E]${element.ename}: ${JSON.stringify(element.payload)}`);
+                } else {
+                    io.to(player.getRoom().getId()).emit(element.ename, element.payload);
+                    console.log(`[I][B]${element.ename}: ${JSON.stringify(element.payload)}`);
+                }
             }
         } else {
             for (let i = 0; i < res.payloads.length; i++) {
                 const element = res.payloads[i];
                 socket.emit(element.ename, element.payload);
                 console.log(`[I][E]${element.ename}: ${JSON.stringify(element.payload)}`);   
+            }
+        }
+    });
+
+    socket.on('select_target', (data) => {
+        console.log(`[I][O]select_target: ${JSON.stringify(data)}`);
+        const player = allClients[data.name];
+        const res = player.selectedCardByGuid(data.guid);
+        for (let i = 0; i < res.length; i++) {
+            const element = res[i];
+            if (element.ename == Events.SELECT_DONE) {
+                socket.emit(element.ename, element.payload);
+                console.log(`[I][E]${element.ename}: ${JSON.stringify(element.payload)}`);
+            } else {
+                io.to(player.getRoom().getId()).emit(element.ename, element.payload);
+                console.log(`[I][B]${element.ename}: ${JSON.stringify(element.payload)}`);
             }
         }
     });

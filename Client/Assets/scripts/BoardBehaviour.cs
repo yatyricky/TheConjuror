@@ -13,7 +13,7 @@ public class BoardBehaviour : MonoBehaviour
     public static PlayerObjectBehaviour EnemyPlayer;
 
     private static int uiState;
-    private static SelectTargetCard currentSelector;
+    private static GameObject SelectTargetObject;
 
     [Header("Players")]
     public GameObject PlayerA;
@@ -29,7 +29,6 @@ public class BoardBehaviour : MonoBehaviour
 
     private void Awake()
     {
-        currentSelector = null;
         uiState = UIState.ACTION;
 
         LocalPlayer = PlayerA.GetComponent<PlayerObjectBehaviour>();
@@ -47,11 +46,6 @@ public class BoardBehaviour : MonoBehaviour
         }
     }
 
-    internal static void SetCurrentSelector(SelectTargetCard selectTargetCard)
-    {
-        currentSelector = selectTargetCard;
-    }
-
     internal static void SetUIState(int state)
     {
         uiState = state;
@@ -62,16 +56,9 @@ public class BoardBehaviour : MonoBehaviour
         return uiState;
     }
 
-    internal static void SelectTarget(GameObject cardObject)
+    internal static void SelectTarget(GameObject co)
     {
-        if (currentSelector == null)
-        {
-            throw new Exception("There is no TargetSelector object");
-        }
-        else
-        {
-            currentSelector.TargetAcquired(cardObject);
-        }
+        NetworkController.Instance.SelectTargetEmit(LocalPlayerName, co.GetComponent<CardObjectBehaviour>().Guid);
     }
 
     internal static bool IsCurrentPlayerAction()
@@ -471,6 +458,48 @@ public class BoardBehaviour : MonoBehaviour
 
     }
 
+    internal static void RemoveBuffCallback(object[] data)
+    {
+        CardObjectBehaviour cob = CardObjectBehaviour.GetCOB((int)data[0]);
+        BuffBehaviour bob = BuffBehaviour.GetBOB((int)data[1]);
+        cob.RemoveBuff(bob.gameObject);
+    }
+
+    internal static void AddBuffCallback(object[] data)
+    {
+        int cardGuid = (int)data[0];
+        int buffGuid = (int)data[1];
+        string iconPath = (string)data[2];
+        BuffBehaviour.Create(CardObjectBehaviour.GetCOB(cardGuid), buffGuid, iconPath);
+    }
+
+    internal static void SelectDoneCallback(object[] data)
+    {
+        PlayerObjectBehaviour p = ForPlayer((string)data[0]);
+        if (SelectTargetObject != null)
+        {
+            Destroy(SelectTargetObject);
+            SelectTargetObject = null;
+        }
+        SetUIState(UIState.ACTION);
+    }
+
+    internal static void SelectTargetCallback(object[] data)
+    {
+        // Requesting a card selection
+        PlayerObjectBehaviour p = ForPlayer((string)data[0]);
+        if (SelectTargetObject != null)
+        {
+            Destroy(SelectTargetObject);
+            SelectTargetObject = null;
+        }
+        SelectTargetObject = Instantiate(Resources.Load("prefabs/Target")) as GameObject;
+        SelectTargetCard sel = SelectTargetObject.GetComponent<SelectTargetCard>();
+        CardObjectBehaviour cob = CardObjectBehaviour.GetCOB((int)data[1]);
+        sel.From = cob.gameObject;
+        SetUIState(UIState.TARGETING);
+    }
+
     internal static void PlayCardSlotCallback(object[] data)
     {
         PlayerObjectBehaviour p = ForPlayer((string)data[0]);
@@ -495,6 +524,7 @@ public class BoardBehaviour : MonoBehaviour
             Sequence s = DOTween.Sequence();
             s.Insert(0f, cob.gameObject.transform.DOMove(cob.OriginPos, GameConfig.F("BATTLE_CARD_DEATH_FLY_TIME")));
             s.Insert(0f, cob.gameObject.transform.DOScale(1.0f, GameConfig.F("BATTLE_CARD_DEATH_FLY_TIME")));
+            cob.State = CardState.GRAVE;
             s.OnComplete(() =>
             {
                 cob.SetTweening(false);

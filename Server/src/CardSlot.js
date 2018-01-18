@@ -12,6 +12,10 @@ class CardSlot {
         this.cards.push(card);
     }
 
+    getCards() {
+        return this.cards;
+    }
+
     getTotalPower() {
         let sum = 0;
         for (let i = 0; i < this.cards.length; i++) {
@@ -87,15 +91,20 @@ class CardSlot {
     }
 
     checkBuffsEndTurn(caster) {
+        let ret = [];
         for (let i = 0; i < this.cards.length; i++) {
-            this.cards[i].checkBuffsEndTurn(caster);
+            ret = ret.concat(this.cards[i].checkBuffsEndTurn(caster));
         }
+        return ret;
     }
 
     getAllCardData() {
         const res = [];
         for (let i = 0; i < this.cards.length; i++) {
-            res.push(this.cards[i].getData());
+            const item = this.cards[i];
+            if (item.canBattle()) {
+                res.push(item.getData());
+            }
         }
         return res;
     }

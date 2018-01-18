@@ -1,4 +1,5 @@
 ﻿const Events = require('../constants/Events');
+const NoBattle = require('../buff/NoBattle');
 
 class Card1000123 {
 
@@ -7,8 +8,24 @@ class Card1000123 {
         this.effectCallback = this.doEffect.bind(this);
     }
 
-    doEffect() {
-
+    doEffect(player, selection) {
+        const ret = [];
+        const debuff = new NoBattle(player);
+        ret.push(selection.addBuff(debuff));
+        ret.push({
+            ename: Events.DISCARD_CARD,
+            payload: {
+                name: player.getName(),
+                guid: this.card.getGuid()
+            }
+        });
+        ret.push({
+            ename: Events.SELECT_DONE,
+            payload: {
+                name: player.getName()
+            }
+        });
+        return ret;
     }
 
     doAction(player) {
@@ -16,7 +33,8 @@ class Card1000123 {
         return {
             ename: Events.SELECT_TARGET,
             payload: {
-                name: player.getName()
+                name: player.getName(),
+                guid: this.card.getGuid()
             }
         };
     }

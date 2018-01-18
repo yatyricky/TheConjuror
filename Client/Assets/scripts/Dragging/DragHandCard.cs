@@ -74,66 +74,6 @@ public class DragHandCard : DraggingActions
         }
     }
 
-    private void PlaySpellCardPreAction(object player, Card cardData)
-    {
-        CardObjectBehaviour cob = gameObject.GetComponent<CardObjectBehaviour>();
-        PlayerObjectBehaviour pob = cob.Owner;
-        // 1. Make creatures undraggale
-        dragabble = false;
-        cob.SetMouseHovering(false);
-        // 1.1. Remove CardObject from HandObject
-        pob.HandArea.GetComponent<HandObjectBehaviour>().RemoveCard(gameObject);
-        // 2. Play effects
-        Sequence s = DOTween.Sequence();
-        float timeNode = 0f;
-        // 3. Move to battle field neutral position
-        Vector3 spellEffectPos = BoardBehaviour.NeutralBattlePoint.transform.position;
-        s.Insert(timeNode, gameObject.transform.DOMove(new Vector3(spellEffectPos.x, spellEffectPos.y, -3f), GameConfig.F("SPELL_CARD_FLY_TIME")));
-        s.Insert(timeNode, gameObject.transform.DOScale(GameConfig.F("SPELL_CARD_SCALE"), GameConfig.F("SPELL_CARD_FLY_TIME")));
-        // 4. Add effect to the card
-        cob.AddEffectParticle();
-        timeNode += GameConfig.F("SPELL_CARD_DISPLAY_TIME") + GameConfig.F("SPELL_CARD_FLY_TIME");
-        s.InsertCallback(timeNode, () =>
-        {
-            //new PlaySpellCard(player, cardData).Fire(PlaySpellCardUpdateUI);
-        });
-    }
-
-    private void PlaySpellCardUpdateUI(object payload)
-    {
-        CardObjectBehaviour cob = gameObject.GetComponent<CardObjectBehaviour>();
-        PlayerObjectBehaviour pob = cob.Owner;
-        // 5. Update player mana
-        //pob.UpdateMana();
-        // 6. Do corresponding UI logic
-        if (payload != null)
-        {
-            Assembly assembly = Assembly.GetExecutingAssembly();
-            Type type = null;
-            try
-            {
-                //type = assembly.GetTypes().First(t => t.Name == payload.ActionName + "View");
-            }
-            catch (InvalidOperationException ioe)
-            {
-                Debug.LogWarning(ioe);
-            }
-            if (type != null)
-            {
-                GameActionUpdateUIView obj = (GameActionUpdateUIView)Activator.CreateInstance(type);
-                //obj.Payload = payload.payload;
-                obj.POB = pob;
-                obj.DoAction();
-            }
-        }
-
-        // 7. Discard card into graveyard
-        cob.OriginPos = pob.Grave.transform.position;
-        gameObject.transform.DOMove(cob.OriginPos, GameConfig.F("BATTLE_CARD_DEATH_FLY_TIME"));
-        gameObject.transform.DOScale(1.0f, GameConfig.F("BATTLE_CARD_DEATH_FLY_TIME"));
-        cob.SetMouseHovering(true);
-    }
-
     public override void OnStartDrag()
     {
     }

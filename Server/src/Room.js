@@ -11,6 +11,8 @@ class Room {
         this.registerTurnStartEvent(this.endTurn.bind(this));
         this.registerTurnStartEvent(this.restoreManaAndAddOne.bind(this));
         this.registerTurnStartEvent(this.playerDrawCard.bind(this));
+
+        this.registerTurnEndEvent(this.buffCheckOnEnd.bind(this));
     }
 
     init() {
@@ -112,6 +114,19 @@ class Room {
         }];
     }
 
+    findCardByGuid(guid, slots = false, hand = false, grave = false) {
+        let indexBundle = this.player1.findCardByGuid(guid, false, slots, hand, grave);
+        if (indexBundle == null) {
+            indexBundle = this.player2.findCardByGuid(guid, false, slots, hand, grave);
+        }
+        if (indexBundle == null) {
+            console.error(`[E]Room.findCardByGuid: no such card (guid:${guid}) in game`);
+            return null;
+        } else {
+            return indexBundle.where[indexBundle.index];
+        }
+    }
+
     playerDrawCard() {
         const ret = [];
         if (this.currentTurn > 0) {
@@ -174,6 +189,12 @@ class Room {
                 name: this.currentPlayer.getName()
             }
         }];
+    }
+
+    buffCheckOnEnd() {
+        let ret = this.player1.checkBuffsEndTurn(this.currentPlayer);
+        ret = ret.concat(this.player2.checkBuffsEndTurn(this.currentPlayer));
+        return ret;
     }
 
     playerAttackSlot(player, from, to) {

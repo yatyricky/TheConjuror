@@ -51,9 +51,11 @@ class Player {
     }
 
     checkBuffsEndTurn(caster) {
+        let ret = [];
         for (let i = 0; i < this.cardSlots.length; i ++) {
-            this.cardSlots[i].checkBuffsEndTurn(caster);
+            ret = ret.concat(this.cardSlots[i].checkBuffsEndTurn(caster));
         }
+        return ret;
     }
 
     restoreSlotAttackCharges() {
@@ -178,21 +180,62 @@ class Player {
         return ret;
     }
 
-    findCardByGuid(where, guid) {
-        let ret = -1;
-        for (let i = 0; i < where.length && ret == -1; i++) {
-            if (where[i].getGuid() == guid) {
-                ret = i;
+    findCardByGuid(guid, warn = true, slots = false, hand = false, grave = false) {
+        let found = -1;
+        let where = null;
+        if (slots === true) {
+            for (let i = 0; i < this.cardSlots.length && found == -1; i++) {
+                let cards = this.cardSlots[i].getCards();
+                for (let j = 0; j < cards.length && found == -1; j++) {
+                    if (cards[j].getGuid() == guid) {
+                        found = j;
+                        where = cards;
+                    }
+                }
             }
         }
-        if (ret == -1) {
-            console.error(`[E]No such card:${guid} in ${JSON.stringify(where)}`);
+        if (hand === true && found == -1) {
+            for (let i = 0; i < this.hand.length && found == -1; i++) {
+                if (this.hand[i].getGuid() == guid) {
+                    found = i;
+                    where = this.hand;
+                }
+            }
         }
-        return ret;
+        if (grave === true && found == -1) {
+            for (let i = 0; i < this.grave.length && found == -1; i++) {
+                if (this.grave[i].getGuid() == guid) {
+                    found = i;
+                    where = this.grave;
+                }
+            }
+        }
+        if (found == -1) {
+            if (warn === true) {
+                console.error(`[E]No such card:${guid} in ${this.name}`);
+            }
+            return null;
+        } else {
+            return {
+                where: where,
+                index: found
+            };
+        }
+    }
+
+    selectedCardByGuid(guid) {
+        const card = this.room.findCardByGuid(guid, true, false, false);
+        if (this.selectActionStack.length <= 0) {
+            console.error(`[E]No select action pushed`);
+        } else {
+            const act = this.selectActionStack.pop();
+            return act(this, card);
+        }
     }
 
     playCardFromHand(guid, slotId) {
-        const index = this.findCardByGuid(this.hand, guid);
+        const indexBundle = this.findCardByGuid(guid, true, false, true, false);
+        const index = indexBundle.index;
         const card = this.hand[index];
         const res = {
             result: false,
@@ -223,14 +266,6 @@ class Player {
                     }
                 });
             } else if (card.getType() == CardTypes.SPELL) {
-                this.grave.push(card);
-                res.payloads.push({
-                    ename: Events.DISCARD_CARD,
-                    payload: {
-                        name: this.getName(),
-                        guid: guid
-                    }
-                });
                 
                 const className = "Card" + card.getId();
                 if (CardAbility.hasOwnProperty(className)) {
@@ -239,10 +274,25 @@ class Player {
                         const resp = obj.doAction(this);
                         if (resp !== undefined && resp.hasOwnProperty("ename")) {
                             res.payloads.push(resp);
+                            if (resp.ename == Events.SELECT_TARGET) {
+                                // Target spells
+                            } else {
+                                // Normal spells
+                                this.grave.push(card);
+                                res.payloads.push({
+                                    ename: Events.DISCARD_CARD,
+                                    payload: {
+                                        name: this.getName(),
+                                        guid: guid
+                                    }
+                                });
+                            }
                         }
                     } else {
                         console.error(`[E]Player.playCardFromHand: ${className} has not defined doAction`);
                     }
+                } else {
+                    console.error(`[E]Player.playCardFromHand: Card${card.getId()}.js doesnt exist`);
                 }
             } else {
                 console.error(`[E]unknown card type: ${JSON.stringify(card)}`);

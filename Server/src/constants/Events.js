@@ -9,7 +9,10 @@ const Events = {
     DRAW_CARD: "draw_card",
     TURN_FOR: "turn_for",
     BATTLE_RES: "battle_res",
-    SELECT_TARGET: "select_target"
+    SELECT_TARGET: "select_target",
+    SELECT_DONE: "select_done",
+    ADD_BUFF: "add_buff",
+    REMOVE_BUFF: "remove_buff"
 };
 
 module.exports = Events;

@@ -1,23 +1,52 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class BuffBehaviour : MonoBehaviour
 {
     public Image Image;
 
-    private Buff buffData;
+    [HideInInspector]public int Guid;
 
-    public Buff BuffData { get { return buffData; } }
+    private static Dictionary<int, BuffBehaviour> AllBuffs = new Dictionary<int, BuffBehaviour>();
 
-    public static GameObject Create(GameObject card, Buff buff)
+    public static GameObject Create(CardObjectBehaviour cob, int guid, string path)
     {
         GameObject bo = Instantiate(Resources.Load("prefabs/Buff")) as GameObject;
         BuffBehaviour bb = bo.GetComponent<BuffBehaviour>();
-        bb.Image.sprite = Resources.Load<Sprite>("sprites/buffs/" + buff.IconPath);
-        bb.buffData = buff;
-        buff.BO = bo;
-        bo.transform.SetParent(card.transform);
-        card.GetComponent<CardObjectBehaviour>().AddBuff(bo);
+        bb.Image.sprite = Resources.Load<Sprite>("sprites/buffs/" + path);
+        bb.Guid = guid;
+        bo.transform.SetParent(cob.gameObject.transform);
+        cob.AddBuff(bo);
+        AddBuff(bb);
         return bo;
+    }
+
+    private static void AddBuff(BuffBehaviour bob)
+    {
+        try
+        {
+            AllBuffs.Add(bob.Guid, bob);
+
+        }
+        catch (ArgumentException e)
+        {
+            throw new Exception(" --- Catched --- : " + e.Message);
+        }
+    }
+
+    internal static BuffBehaviour GetBOB(int guid)
+    {
+        BuffBehaviour ret = null;
+        if (AllBuffs.TryGetValue(guid, out ret))
+        {
+            return ret;
+        }
+        else
+        {
+            Debug.LogError(Environment.StackTrace);
+            throw new Exception("No such buff in the game, id: " + guid);
+        }
     }
 }

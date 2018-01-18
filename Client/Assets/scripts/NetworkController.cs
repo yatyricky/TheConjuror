@@ -72,6 +72,9 @@ public class NetworkController : MonoBehaviour
         socket.On("select_target", SelectTargetCallback);
         socket.On("play_card_slot", PlayCardSlotCallback);
         socket.On("discard_card", DiscardCardCallback);
+        socket.On("select_done", SelectDoneCallback);
+        socket.On("add_buff", AddBuffCallback);
+        socket.On("remove_buff", RemoveBuffCallback);
     }
 
     #region Connection and Login
@@ -242,9 +245,19 @@ public class NetworkController : MonoBehaviour
 
     #region Select Target
 
+    internal void SelectTargetEmit(string name, int guid)
+    {
+        JSONObject data = JSONObject.Create();
+        data.AddField("name", name);
+        data.AddField("guid", guid);
+        socket.Emit("select_target", data);
+    }
+
     private void SelectTargetCallback(SocketIOEvent e)
     {
-        Debug.Log("Should be selecting a target now");
+        string who = e.data.GetField("name").str;
+        int guid = (int)e.data.GetField("guid").n;
+        BoardBehaviour.CrossScenePayloads.Enqueue(new CrossScenePayload(BoardBehaviour.SelectTargetCallback, who, guid));
     }
 
     #endregion
@@ -269,6 +282,40 @@ public class NetworkController : MonoBehaviour
         int slot = (int)e.data.GetField("slot").n;
         int power = (int)e.data.GetField("power").n;
         BoardBehaviour.CrossScenePayloads.Enqueue(new CrossScenePayload(BoardBehaviour.PlayCardSlotCallback, who, guid, slot, power));
+    }
+
+    #endregion
+
+    #region Select Done
+
+    private void SelectDoneCallback(SocketIOEvent e)
+    {
+        string who = e.data.GetField("name").str;
+        BoardBehaviour.CrossScenePayloads.Enqueue(new CrossScenePayload(BoardBehaviour.SelectDoneCallback, who));
+    }
+
+    #endregion
+
+    #region Add Buff
+
+    private void AddBuffCallback(SocketIOEvent e)
+    {
+        int cardGuid = (int)e.data.GetField("guid").n;
+        JSONObject obj = e.data.GetField("buff");
+        int buffGuid = (int)obj.GetField("guid").n;
+        string iconPath = obj.GetField("icon").str;
+        BoardBehaviour.CrossScenePayloads.Enqueue(new CrossScenePayload(BoardBehaviour.AddBuffCallback, cardGuid, buffGuid, iconPath));
+    }
+
+    #endregion
+
+    #region Remove Buff
+
+    private void RemoveBuffCallback(SocketIOEvent e)
+    {
+        int cardGuid = (int)e.data.GetField("cguid").n;
+        int buffGuid = (int)e.data.GetField("bguid").n;
+        BoardBehaviour.CrossScenePayloads.Enqueue(new CrossScenePayload(BoardBehaviour.RemoveBuffCallback, cardGuid, buffGuid));
     }
 
     #endregion

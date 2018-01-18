@@ -8,20 +8,9 @@ public class SelectTargetCard : MonoBehaviour
     public Image Arrow;
     public LineRenderer lineRenderer;
 
-    private string player;
-    private Card card;
-    private Action<GameObject> actWhenSelected;
+    [HideInInspector]public GameObject From;
 
     private float zDisplacement;
-
-    internal void SetData(string player, Card card, Action<GameObject> act)
-    {
-        this.player = player;
-        this.card = card;
-        actWhenSelected = act;
-        BoardBehaviour.SetUIState(UIState.TARGETING);
-        BoardBehaviour.SetCurrentSelector(this);
-    }
 
     private void Start()
     {
@@ -37,18 +26,15 @@ public class SelectTargetCard : MonoBehaviour
 
     private void Update()
     {
-        //Vector3 mousePos = MouseInWorldCoords();
-        //Arrow.enabled = false;
-        //Aim.transform.position = new Vector3(mousePos.x, mousePos.y, transform.position.z);
-        //Vector3 from = new Vector3(card.COB.gameObject.transform.position.x, card.COB.gameObject.transform.position.y, -4f);
-        //Vector3 to = new Vector3(mousePos.x, mousePos.y, -4f);
-        //Vector3 direction = (to - from).normalized;
-        //lineRenderer.SetPositions(new Vector3[] {from , to - direction * 0.9f});
-    }
-
-    internal void TargetAcquired(GameObject cardObject)
-    {
-        BoardBehaviour.SetUIState(UIState.ACTION);
-        actWhenSelected(cardObject);
+        if (From != null)
+        {
+            Vector3 mousePos = MouseInWorldCoords();
+            Arrow.enabled = false;
+            Aim.transform.position = new Vector3(mousePos.x, mousePos.y, transform.position.z);
+            Vector3 from = new Vector3(From.transform.position.x, From.transform.position.y, -4f);
+            Vector3 to = new Vector3(mousePos.x, mousePos.y, -4f);
+            Vector3 direction = (to - from).normalized;
+            lineRenderer.SetPositions(new Vector3[] { from, to - direction * 0.9f });
+        }
     }
 }
