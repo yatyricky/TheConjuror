@@ -10,9 +10,12 @@ const Events = {
     TURN_FOR: "turn_for",
     BATTLE_RES: "battle_res",
     SELECT_TARGET: "select_target",
+    SELECT_SLOT: "select_slot",
     SELECT_DONE: "select_done",
     ADD_BUFF: "add_buff",
-    REMOVE_BUFF: "remove_buff"
+    REMOVE_BUFF: "remove_buff",
+    UPDATE_SLOT_POWER: "update_slot_power",
+    UPDATE_CARD_POWER: "update_card_power"
 };
 
 module.exports = Events;

@@ -6,10 +6,11 @@ let guid = 0;
 
 class Card {
 
-    constructor(id) {
+    constructor(id, player) {
         if (GameData.cardBase.hasOwnProperty(id)) {
             const cardData = GameData.cardBase[id];
             this.id = id;
+            this.owner = player;
             this.name = cardData.name;
             this.color = cardData.color;
             this.ctype = cardData.ctype;
@@ -18,14 +19,20 @@ class Card {
             this.power = cardData.power;
             this.maxPower = this.power;
             this.buffs = [];
+            this.attrs = {};
             this.guid = guid++;
         } else {
             console.error("[E]Creating card from unknown id: " + id);
         }
     }
 
+    getOwner() {
+        return this.owner;
+    }
+
     addBuff(buff) {
         this.buffs.push(buff);
+        buff.onApply(this);
         return {
             ename: Events.ADD_BUFF,
             payload: {
@@ -33,6 +40,10 @@ class Card {
                 buff: buff.getData()
             }
         };
+    }
+
+    getAttrs() {
+        return this.attrs;
     }
 
     getGuid() {
@@ -45,6 +56,10 @@ class Card {
 
     getPower() {
         return this.power;
+    }
+
+    modPower(mod) {
+        this.power += mod;
     }
 
     getData() {
@@ -69,13 +84,10 @@ class Card {
     }
 
     canBattle() {
-        let can = true;
-        for (let i = 0; i < this.buffs.length && can == true; i++) {
-            if (this.buffs[i].getType() == BuffTypes.NO_BATTLE) {
-                can = false;
-            }
+        if (!this.attrs.hasOwnProperty(BuffTypes.NoBattle)) {
+            this.attrs[BuffTypes.NoBattle] = 0;
         }
-        return can;
+        return this.attrs[BuffTypes.NoBattle] == 0;
     }
 
     takeDamage(num) {
@@ -94,6 +106,12 @@ class Card {
                         cguid: this.guid,
                         bguid: item.getData().guid
                     }
+                }, {
+                    ename: Events.UPDATE_CARD_POWER,
+                    payload: {
+                        guid: this.guid,
+                        power: this.power
+                    }
                 }]);
                 i--;
             }
@@ -102,6 +120,7 @@ class Card {
     }
 
     removeBuff(buff) {
+        buff.onRemove(this);
         const index = this.buffs.indexOf(buff);
         this.buffs.splice(index, 1);
     }

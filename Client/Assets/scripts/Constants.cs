@@ -19,6 +19,7 @@ public class UIState
     public static int ACTION = 0;
     public static int BATTLING = 100;
     public static int TARGETING = 150;
+    internal static int SLOT_TARGETING = 151;
 }
 
 public class CardState

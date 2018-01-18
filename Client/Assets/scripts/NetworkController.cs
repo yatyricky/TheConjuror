@@ -70,11 +70,14 @@ public class NetworkController : MonoBehaviour
         socket.On("update_mana", UpdateManaCallback);
         socket.On("battle_res", BattleResCallback);
         socket.On("select_target", SelectTargetCallback);
+        socket.On("select_slot", SelectSlotCallback);
         socket.On("play_card_slot", PlayCardSlotCallback);
         socket.On("discard_card", DiscardCardCallback);
         socket.On("select_done", SelectDoneCallback);
         socket.On("add_buff", AddBuffCallback);
         socket.On("remove_buff", RemoveBuffCallback);
+        socket.On("update_slot_power", UpdateSlotPowerCallback);
+        socket.On("update_card_power", UpdateCardPowerCallback);
     }
 
     #region Connection and Login
@@ -262,6 +265,26 @@ public class NetworkController : MonoBehaviour
 
     #endregion
 
+    #region Select Slot
+
+    internal void SelectSlotEmit(string name, string targetName, int slotId)
+    {
+        JSONObject data = JSONObject.Create();
+        data.AddField("name", name);
+        data.AddField("target", targetName);
+        data.AddField("slot", slotId);
+        socket.Emit("select_slot", data);
+    }
+
+    private void SelectSlotCallback(SocketIOEvent e)
+    {
+        string who = e.data.GetField("name").str;
+        int guid = (int)e.data.GetField("guid").n;
+        BoardBehaviour.CrossScenePayloads.Enqueue(new CrossScenePayload(BoardBehaviour.SelectSlotCallback, who, guid));
+    }
+
+    #endregion
+
     #region Discard Card
 
     private void DiscardCardCallback(SocketIOEvent e)
@@ -316,6 +339,29 @@ public class NetworkController : MonoBehaviour
         int cardGuid = (int)e.data.GetField("cguid").n;
         int buffGuid = (int)e.data.GetField("bguid").n;
         BoardBehaviour.CrossScenePayloads.Enqueue(new CrossScenePayload(BoardBehaviour.RemoveBuffCallback, cardGuid, buffGuid));
+    }
+
+    #endregion
+
+    #region Update Card Power
+
+    private void UpdateCardPowerCallback(SocketIOEvent e)
+    {
+        int guid = (int)e.data.GetField("guid").n;
+        int power = (int)e.data.GetField("power").n;
+        BoardBehaviour.CrossScenePayloads.Enqueue(new CrossScenePayload(BoardBehaviour.UpdateCardPowerCallback, guid, power));
+    }
+
+    #endregion
+
+    #region Update Slot Power
+
+    private void UpdateSlotPowerCallback(SocketIOEvent e)
+    {
+        string name = e.data.GetField("name").str;
+        int slot = (int)e.data.GetField("slot").n;
+        int power = (int)e.data.GetField("power").n;
+        BoardBehaviour.CrossScenePayloads.Enqueue(new CrossScenePayload(BoardBehaviour.UpdateSlotPowerCallback, name, slot, power));
     }
 
     #endregion

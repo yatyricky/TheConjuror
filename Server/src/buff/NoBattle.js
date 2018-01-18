@@ -1,6 +1,5 @@
 const BuffTypes = require('../constants/BuffTypes');
-
-let guid = 0;
+const {NewBuffGuid} = require('../utils/SNGenerator');
 
 class NoBattle {
 
@@ -8,7 +7,27 @@ class NoBattle {
         this.iconPath = 'no_battle';
         this.type = BuffTypes.NO_BATTLE;
         this.caster = player;
-        this.guid = guid++;
+        this.guid = NewBuffGuid();
+    }
+
+    onApply(card) {
+        let attr = card.getAttrs();
+        if (!attr.hasOwnProperty(BuffTypes.NoBattle)) {
+            attr[BuffTypes.NoBattle] = 0;
+        }
+        attr[BuffTypes.NoBattle] += 1;
+    }
+
+    onRemove(card) {
+        let attr = card.getAttrs();
+        if (!attr.hasOwnProperty(BuffTypes.NoBattle)) {
+            console.error(`[E]NoBattle.onRemove: card:${JSON.stringify(card)} doesnt have NoBattle buff`);
+        }
+        attr[BuffTypes.NoBattle] -= 1;
+        if (attr[BuffTypes.NoBattle] < 0) {
+            attr[BuffTypes.NoBattle] = 0;
+            console.error(`[E]NoBattle.onRemove: card:${JSON.stringify(card)} NoBattle value below 0`);
+        }
     }
 
     shouldFadeEndTurn() {

@@ -154,6 +154,7 @@ public class CardObjectBehaviour : MonoBehaviour
             if (state == CardState.SLOT)
             {
                 BoardBehaviour.SelectTarget(gameObject);
+                BoardBehaviour.SetUIState(UIState.ACTION);
             }
         }
     }

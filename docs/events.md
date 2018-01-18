@@ -26,6 +26,16 @@
 }
 ```
 
+## select_slot
+
+``` js
+{
+    name: "player name",
+    target: "target player name",
+    slot: "slot id"
+}
+```
+
 ## attack_slot
 
 ``` js
@@ -173,6 +183,15 @@ Case 2: game start.
 }
 ```
 
+## select_slot
+
+``` js
+{
+    name: "player name",
+    guid: "card guid"
+}
+```
+
 ## play_card_slot
 
 ``` js
@@ -219,5 +238,24 @@ Case 2: game start.
 {
     cguid: "card guid",
     bguid: "buff guid"
+}
+```
+
+## update_slot_power
+
+``` js
+{
+    name: "player name",
+    slot: "which slot",
+    power: "power value"
+}
+```
+
+## update_card_power
+
+``` js
+{
+    guid: "card guid",
+    power: "power value"
 }
 ```

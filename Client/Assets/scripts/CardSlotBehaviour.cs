@@ -88,9 +88,14 @@ public class CardSlotBehaviour : MonoBehaviour
 
     private void OnMouseDown()
     {
-        if (BoardBehaviour.GetUIState() != UIState.TARGETING && BoardBehaviour.IsCurrentPlayerAction())
+        if (BoardBehaviour.GetUIState() != UIState.TARGETING && BoardBehaviour.GetUIState() != UIState.SLOT_TARGETING && BoardBehaviour.IsCurrentPlayerAction())
         {
             NetworkController.Instance.PlayerAttackWithSlot(BoardBehaviour.LocalPlayerName, SlotId, SlotId);
+        }
+        if (BoardBehaviour.GetUIState() == UIState.SLOT_TARGETING)
+        {
+            NetworkController.Instance.SelectSlotEmit(BoardBehaviour.LocalPlayerName, Pob.PlayerName, SlotId);
+            BoardBehaviour.SetUIState(UIState.ACTION);
         }
     }
 

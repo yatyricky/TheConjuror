@@ -91,7 +91,7 @@ io.on('connection', (socket) => {
         if (res.result === true) {
             for (let i = 0; i < res.payloads.length; i++) {
                 const element = res.payloads[i];
-                if (element.ename == Events.SELECT_TARGET) {
+                if (element.ename == Events.SELECT_TARGET || element.ename == Events.SELECT_SLOT) {
                     socket.emit(element.ename, element.payload);
                     console.log(`[I][E]${element.ename}: ${JSON.stringify(element.payload)}`);
                 } else {
@@ -112,6 +112,23 @@ io.on('connection', (socket) => {
         console.log(`[I][O]select_target: ${JSON.stringify(data)}`);
         const player = allClients[data.name];
         const res = player.selectedCardByGuid(data.guid);
+        for (let i = 0; i < res.length; i++) {
+            const element = res[i];
+            if (element.ename == Events.SELECT_DONE) {
+                socket.emit(element.ename, element.payload);
+                console.log(`[I][E]${element.ename}: ${JSON.stringify(element.payload)}`);
+            } else {
+                io.to(player.getRoom().getId()).emit(element.ename, element.payload);
+                console.log(`[I][B]${element.ename}: ${JSON.stringify(element.payload)}`);
+            }
+        }
+    });
+
+    socket.on('select_slot', (data) => {
+        console.log(`[I][O]select_slot: ${JSON.stringify(data)}`);
+        const player = allClients[data.name];
+        const target = allClients[data.target];
+        const res = player.selectedSlot(target, data.slot);
         for (let i = 0; i < res.length; i++) {
             const element = res[i];
             if (element.ename == Events.SELECT_DONE) {

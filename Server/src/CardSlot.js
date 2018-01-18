@@ -1,8 +1,11 @@
-﻿const CardAbility = require('./cardAbilities/CardAbility');
+﻿const Events = require('./constants/Events');
+const CardAbility = require('./cardAbilities/CardAbility');
 
 class CardSlot {
 
-    constructor(color) {
+    constructor(color, id, player) {
+        this.id = id;
+        this.owner = player;
         this.color = color;
         this.attacks = 1;
         this.cards = [];
@@ -93,7 +96,18 @@ class CardSlot {
     checkBuffsEndTurn(caster) {
         let ret = [];
         for (let i = 0; i < this.cards.length; i++) {
-            ret = ret.concat(this.cards[i].checkBuffsEndTurn(caster));
+            const resp = this.cards[i].checkBuffsEndTurn(caster);
+            if (resp.length > 0) {
+                ret = ret.concat(resp);
+                ret = ret.concat([{
+                    ename: Events.UPDATE_SLOT_POWER,
+                    payload: {
+                        name: this.owner.getName(),
+                        slot: this.id,
+                        power: this.getTotalPower()
+                    }
+                }]);
+            }
         }
         return ret;
     }
@@ -107,6 +121,10 @@ class CardSlot {
             }
         }
         return res;
+    }
+
+    getId() {
+        return this.id;
     }
 
     getModifiers(isAttacker) {

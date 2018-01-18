@@ -458,6 +458,34 @@ public class BoardBehaviour : MonoBehaviour
 
     }
 
+    internal static void SelectSlotCallback(object[] data)
+    {
+        // Requesting a slot selection
+        PlayerObjectBehaviour p = ForPlayer((string)data[0]);
+        if (SelectTargetObject != null)
+        {
+            Destroy(SelectTargetObject);
+            SelectTargetObject = null;
+        }
+        SelectTargetObject = Instantiate(Resources.Load("prefabs/Target")) as GameObject;
+        SelectTargetCard sel = SelectTargetObject.GetComponent<SelectTargetCard>();
+        CardObjectBehaviour cob = CardObjectBehaviour.GetCOB((int)data[1]);
+        sel.From = cob.gameObject;
+        SetUIState(UIState.SLOT_TARGETING);
+    }
+
+    internal static void UpdateSlotPowerCallback(object[] data)
+    {
+        PlayerObjectBehaviour p = ForPlayer((string)data[0]);
+        p.UpdateCardSlotPower((int)data[1], (int)data[2]);
+    }
+
+    internal static void UpdateCardPowerCallback(object[] data)
+    {
+        CardObjectBehaviour cob = CardObjectBehaviour.GetCOB((int)data[0]);
+        cob.UpdatePower((int)data[1]);
+    }
+
     internal static void RemoveBuffCallback(object[] data)
     {
         CardObjectBehaviour cob = CardObjectBehaviour.GetCOB((int)data[0]);

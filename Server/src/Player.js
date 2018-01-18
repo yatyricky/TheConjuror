@@ -17,11 +17,11 @@ class Player {
         this.hand = [];
         this.grave = [];
         this.cardSlots = []; // 5 max
-        this.cardSlots.push(new CardSlot(Colors.WHITE));
-        this.cardSlots.push(new CardSlot(Colors.BLUE));
-        this.cardSlots.push(new CardSlot(Colors.ALL));
-        this.cardSlots.push(new CardSlot(Colors.GREEN));
-        this.cardSlots.push(new CardSlot(Colors.RED));
+        this.cardSlots.push(new CardSlot(Colors.WHITE, 0, this));
+        this.cardSlots.push(new CardSlot(Colors.BLUE, 1, this));
+        this.cardSlots.push(new CardSlot(Colors.ALL, 2, this));
+        this.cardSlots.push(new CardSlot(Colors.GREEN, 3, this));
+        this.cardSlots.push(new CardSlot(Colors.RED, 4, this));
         this.maxHealth = 20;
         this.health = this.maxHealth;
         this.maxMana = 0;
@@ -54,6 +54,9 @@ class Player {
         let ret = [];
         for (let i = 0; i < this.cardSlots.length; i ++) {
             ret = ret.concat(this.cardSlots[i].checkBuffsEndTurn(caster));
+        }
+        for (let i = 0; i < this.grave.length; i ++) {
+            ret = ret.concat(this.grave[i].checkBuffsEndTurn(caster));
         }
         return ret;
     }
@@ -223,6 +226,20 @@ class Player {
         }
     }
 
+    locateCard(card) {
+        let ret = -1;
+        for (let i = 0; i < this.cardSlots.length && ret == -1; i++) {
+            const index = this.cardSlots[i].getCards().indexOf(card);
+            if (index != -1) {
+                ret = i;
+            }
+        }
+        if (ret == -1) {
+            console.error(`[E]Player.locateCard: unable to find card:${card} in ${this.name}`);
+        }
+        return ret;
+    }
+
     selectedCardByGuid(guid) {
         const card = this.room.findCardByGuid(guid, true, false, false);
         if (this.selectActionStack.length <= 0) {
@@ -230,6 +247,15 @@ class Player {
         } else {
             const act = this.selectActionStack.pop();
             return act(this, card);
+        }
+    }
+
+    selectedSlot(target, sid) {
+        if (this.selectActionStack.length <= 0) {
+            console.error(`[E]No select action pushed`);
+        } else {
+            const act = this.selectActionStack.pop();
+            return act(this, target, target.cardSlots[sid]);
         }
     }
 
@@ -266,7 +292,6 @@ class Player {
                     }
                 });
             } else if (card.getType() == CardTypes.SPELL) {
-                
                 const className = "Card" + card.getId();
                 if (CardAbility.hasOwnProperty(className)) {
                     const obj = new CardAbility[className](card);
@@ -274,7 +299,7 @@ class Player {
                         const resp = obj.doAction(this);
                         if (resp !== undefined && resp.hasOwnProperty("ename")) {
                             res.payloads.push(resp);
-                            if (resp.ename == Events.SELECT_TARGET) {
+                            if (resp.ename == Events.SELECT_TARGET || resp.ename == Events.SELECT_SLOT) {
                                 // Target spells
                             } else {
                                 // Normal spells
@@ -315,7 +340,7 @@ class Player {
             for (let i = 0; i < GameData.deckBase[this.deckName].length; i++) {
                 const element = GameData.deckBase[this.deckName][i];
                 for (let j = 0; j < element.num; j ++) {
-                    this.deck.add(new Card(element.id));
+                    this.deck.add(new Card(element.id, this));
                 }
             }
         } else {
