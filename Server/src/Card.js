@@ -1,5 +1,6 @@
 ﻿const GameData = require('./GameData');
 const BuffTypes = require('./constants/BuffTypes');
+const CardTypes = require('./constants/CardTypes');
 const Events = require('./constants/Events');
 
 let guid = 0;
@@ -17,6 +18,7 @@ class Card {
             this.cost = cardData.cost;
             this.description = cardData.description;
             this.power = cardData.power;
+            this.allowedSlots = cardData.allowSlot.split(",");
             this.maxPower = this.power;
             this.buffs = [];
             this.attrs = {};
@@ -28,6 +30,10 @@ class Card {
 
     getOwner() {
         return this.owner;
+    }
+
+    allowedIn(color) {
+        return this.allowedSlots.indexOf(color) != -1;
     }
 
     addBuff(buff) {
@@ -84,10 +90,14 @@ class Card {
     }
 
     canBattle() {
-        if (!this.attrs.hasOwnProperty(BuffTypes.NoBattle)) {
-            this.attrs[BuffTypes.NoBattle] = 0;
+        if (this.ctype == CardTypes.CREATURE) {
+            if (!this.attrs.hasOwnProperty(BuffTypes.NoBattle)) {
+                this.attrs[BuffTypes.NoBattle] = 0;
+            }
+            return this.attrs[BuffTypes.NoBattle] == 0;
+        } else {
+            return false;
         }
-        return this.attrs[BuffTypes.NoBattle] == 0;
     }
 
     takeDamage(num) {

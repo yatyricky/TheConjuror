@@ -231,20 +231,6 @@ class Player {
         }
     }
 
-    locateCard(card) {
-        let ret = -1;
-        for (let i = 0; i < this.cardSlots.length && ret == -1; i++) {
-            const index = this.cardSlots[i].getCards().indexOf(card);
-            if (index != -1) {
-                ret = i;
-            }
-        }
-        if (ret == -1) {
-            console.error(`[E]Player.locateCard: unable to find card:${card} in ${this.name}`);
-        }
-        return ret;
-    }
-
     selectedCardByGuid(guid) {
         const card = this.room.findCardByGuid(guid, true, false, false);
         if (this.selectActionStack.length <= 0) {
@@ -272,7 +258,7 @@ class Player {
             result: false,
             payloads: []
         };
-        if (card.getCost() <= this.mana && this.getRoom().getCurrentPlayer().getName() == this.getName()) {
+        if (card.getCost() <= this.mana && this.getRoom().getCurrentPlayer().getName() == this.getName() && card.allowedIn(this.cardSlots[slotId].getColor())) {
             this.hand.splice(index, 1);
             this.mana -= card.getCost();
             res.result = true;

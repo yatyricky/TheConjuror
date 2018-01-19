@@ -84,7 +84,7 @@ public class NetworkController : MonoBehaviour
 
     private void ConnectionEstablishedCallback(SocketIOEvent e)
     {
-        Debug.Log("[O]Connected to server");
+        Debug.Log("[O]connection_established");
         messageOverlay.Hide();
 
         JSONObject data = JSONObject.Create();
@@ -94,7 +94,7 @@ public class NetworkController : MonoBehaviour
 
     private void LoginCallback(SocketIOEvent e)
     {
-        Debug.Log("[O]Login result received: " + e.data);
+        Debug.Log("[O]login: " + e.data);
         if (e.data.GetField("cmd").str.Equals("wait"))
         {
             messageOverlay.Show(MessageBehaviour.WAITING);
@@ -123,6 +123,7 @@ public class NetworkController : MonoBehaviour
 
     private void TurnForCallback(SocketIOEvent e)
     {
+        Debug.Log("[O]turn_for: " + e.data);
         BoardBehaviour.CurrentPlayerName = e.data.GetField("name").str;
     }
 
@@ -132,7 +133,7 @@ public class NetworkController : MonoBehaviour
 
     private void DrawCardCallback(SocketIOEvent e)
     {
-        Debug.Log("[O]PlayerDrawCards " + e.ToString());
+        Debug.Log("[O]draw_card: " + e.ToString());
         string who = e.data.GetField("name").str;
         List<JSONObject> cardsObj = e.data.GetField("cards").list;
         List<Card> cards = new List<Card>();
@@ -167,7 +168,7 @@ public class NetworkController : MonoBehaviour
 
     private void PlayCardCallback(SocketIOEvent e)
     {
-        Debug.Log("[O]PlayerPlayCardToSlot " + e.ToString());
+        Debug.Log("[O]play_card " + e.ToString());
         string who = e.data.GetField("name").str;
         int guid = (int)e.data.GetField("guid").n;
         int mana = (int)e.data.GetField("mana").n;
@@ -176,7 +177,7 @@ public class NetworkController : MonoBehaviour
 
     private void PlayCardFailCallback(SocketIOEvent e)
     {
-        Debug.Log("[O]PlayerPlayCardToSlotFailed: " + e.ToString());
+        Debug.Log("[O]play_card_fail: " + e.ToString());
         string who = e.data.GetField("name").str;
         int guid = (int)e.data.GetField("guid").n;
         BoardBehaviour.CrossScenePayloads.Enqueue(new CrossScenePayload(BoardBehaviour.PlayCardFailCallback, who, guid));
@@ -199,6 +200,7 @@ public class NetworkController : MonoBehaviour
 
     private void UpdateManaCallback(SocketIOEvent e)
     {
+        Debug.Log("[O]update_mana: " + e.ToString());
         string who = e.data.GetField("name").str;
         int mana = (int)e.data.GetField("mana").n;
         BoardBehaviour.CrossScenePayloads.Enqueue(new CrossScenePayload(BoardBehaviour.UpdatePlayerMana, who, mana));
@@ -219,6 +221,7 @@ public class NetworkController : MonoBehaviour
 
     private void BattleResCallback(SocketIOEvent e)
     {
+        Debug.Log("[O]battle_res: " + e.ToString());
         string aname = e.data.GetField("aname").str;
         string dname = e.data.GetField("dname").str;
         List<BattleCardModifier> amods = JSONListToBCMList(e.data.GetField("amods").list);
@@ -257,6 +260,7 @@ public class NetworkController : MonoBehaviour
 
     private void SelectTargetCallback(SocketIOEvent e)
     {
+        Debug.Log("[O]select_target: " + e.ToString());
         string who = e.data.GetField("name").str;
         int guid = (int)e.data.GetField("guid").n;
         BoardBehaviour.CrossScenePayloads.Enqueue(new CrossScenePayload(BoardBehaviour.SelectTargetCallback, who, guid));
@@ -277,6 +281,7 @@ public class NetworkController : MonoBehaviour
 
     private void SelectSlotCallback(SocketIOEvent e)
     {
+        Debug.Log("[O]select_slot: " + e.ToString());
         string who = e.data.GetField("name").str;
         int guid = (int)e.data.GetField("guid").n;
         BoardBehaviour.CrossScenePayloads.Enqueue(new CrossScenePayload(BoardBehaviour.SelectSlotCallback, who, guid));
@@ -288,6 +293,7 @@ public class NetworkController : MonoBehaviour
 
     private void DiscardCardCallback(SocketIOEvent e)
     {
+        Debug.Log("[O]discard_card: " + e.ToString());
         string who = e.data.GetField("name").str;
         int guid = (int)e.data.GetField("guid").n;
         BoardBehaviour.CrossScenePayloads.Enqueue(new CrossScenePayload(BoardBehaviour.DiscardCardCallback, who, guid));
@@ -299,6 +305,7 @@ public class NetworkController : MonoBehaviour
 
     private void PlayCardSlotCallback(SocketIOEvent e)
     {
+        Debug.Log("[O]play_card_slot: " + e.ToString());
         string who = e.data.GetField("name").str;
         int guid = (int)e.data.GetField("guid").n;
         int slot = (int)e.data.GetField("slot").n;
@@ -312,6 +319,7 @@ public class NetworkController : MonoBehaviour
 
     private void SelectDoneCallback(SocketIOEvent e)
     {
+        Debug.Log("[O]select_done: " + e.ToString());
         string who = e.data.GetField("name").str;
         BoardBehaviour.CrossScenePayloads.Enqueue(new CrossScenePayload(BoardBehaviour.SelectDoneCallback, who));
     }
@@ -322,6 +330,7 @@ public class NetworkController : MonoBehaviour
 
     private void AddBuffCallback(SocketIOEvent e)
     {
+        Debug.Log("[O]add_buff: " + e.ToString());
         int cardGuid = (int)e.data.GetField("guid").n;
         JSONObject obj = e.data.GetField("buff");
         int buffGuid = (int)obj.GetField("guid").n;
@@ -335,6 +344,7 @@ public class NetworkController : MonoBehaviour
 
     private void RemoveBuffCallback(SocketIOEvent e)
     {
+        Debug.Log("[O]remove_buff: " + e.ToString());
         int cardGuid = (int)e.data.GetField("cguid").n;
         int buffGuid = (int)e.data.GetField("bguid").n;
         BoardBehaviour.CrossScenePayloads.Enqueue(new CrossScenePayload(BoardBehaviour.RemoveBuffCallback, cardGuid, buffGuid));
@@ -346,6 +356,7 @@ public class NetworkController : MonoBehaviour
 
     private void UpdateCardPowerCallback(SocketIOEvent e)
     {
+        Debug.Log("[O]update_card_power: " + e.ToString());
         int guid = (int)e.data.GetField("guid").n;
         int power = (int)e.data.GetField("power").n;
         BoardBehaviour.CrossScenePayloads.Enqueue(new CrossScenePayload(BoardBehaviour.UpdateCardPowerCallback, guid, power));
@@ -357,6 +368,7 @@ public class NetworkController : MonoBehaviour
 
     private void UpdateSlotPowerCallback(SocketIOEvent e)
     {
+        Debug.Log("[O]update_slot_power: " + e.ToString());
         string name = e.data.GetField("name").str;
         int slot = (int)e.data.GetField("slot").n;
         int power = (int)e.data.GetField("power").n;

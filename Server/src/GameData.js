@@ -15,26 +15,16 @@ for (let i = 0; i < ws.length; i++) {
         let costIndex = -1;
         let powerIndex = -1;
         let descIndex = -1;
+        let allowSlotIndex = -1;
         for (let j = 0; j < element.data[0].length; j++) {
             const item = element.data[0][j];
-            if (item == "name") {
-                nameIndex = j;
-            }
-            if (item == "color") {
-                colorIndex = j;
-            }
-            if (item == "type") {
-                ctypeIndex = j;
-            }
-            if (item == "cost") {
-                costIndex = j;
-            }
-            if (item == "power") {
-                powerIndex = j;
-            }
-            if (item == "description") {
-                descIndex = j;
-            }
+            if (item == "name") nameIndex = j;
+            if (item == "color") colorIndex = j;
+            if (item == "type") ctypeIndex = j;
+            if (item == "cost") costIndex = j;
+            if (item == "power") powerIndex = j;
+            if (item == "description") descIndex = j;
+            if (item == "allowslot") allowSlotIndex = j;
         }
         let j = 1;
         while (j < element.data.length && element.data[j].length > 1) {
@@ -44,7 +34,8 @@ for (let i = 0; i < ws.length; i++) {
                 ctype: element.data[j].length > ctypeIndex ? element.data[j][ctypeIndex] : "",
                 cost: element.data[j].length > costIndex ? element.data[j][costIndex] : "",
                 description: element.data[j].length > descIndex ? element.data[j][descIndex] : "",
-                power: element.data[j].length > powerIndex ? element.data[j][powerIndex] : ""
+                power: element.data[j].length > powerIndex ? element.data[j][powerIndex] : "",
+                allowSlot: element.data[j].length > allowSlotIndex ? element.data[j][allowSlotIndex] : ""
             };
             j ++;
         }

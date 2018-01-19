@@ -11,6 +11,10 @@ class CardSlot {
         this.cards = [];
     }
 
+    getColor() {
+        return this.color;
+    }
+
     add(card) {
         this.cards.push(card);
     }

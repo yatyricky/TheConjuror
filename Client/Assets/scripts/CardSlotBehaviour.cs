@@ -49,13 +49,16 @@ public class CardSlotBehaviour : MonoBehaviour
                 CardObjectBehaviour cob = cardObjs.ElementAt(i).GetComponent<CardObjectBehaviour>();
                 cob.OriginPos = new Vector3(basePos.x + i * margin, basePos.y, (i + 1) * -0.01f - 1f);
 
-                cob.SetTweening(true);
-                Sequence s = DOTween.Sequence();
-                s.Insert(0f, cob.gameObject.transform.DOMove(cob.OriginPos, GameConfig.F("CARD_SLOT_RENDER_MOVE_TIME")));
-                s.Insert(0f, cob.gameObject.transform.DOScale(1.0f, GameConfig.F("CARD_SLOT_RENDER_MOVE_TIME")));
-                s.OnComplete(() =>
+                cob.AddDoTweens(() => 
                 {
-                    cob.SetTweening(false);
+                    cob.SetTweening(true);
+                    Sequence s = DOTween.Sequence();
+                    s.Insert(0f, cob.gameObject.transform.DOMove(cob.OriginPos, GameConfig.F("CARD_SLOT_RENDER_MOVE_TIME")));
+                    s.Insert(0f, cob.gameObject.transform.DOScale(1.0f, GameConfig.F("CARD_SLOT_RENDER_MOVE_TIME")));
+                    s.OnComplete(() =>
+                    {
+                        cob.SetTweening(false);
+                    });
                 });
             }
         }
@@ -101,11 +104,18 @@ public class CardSlotBehaviour : MonoBehaviour
 
     internal void MoveToGrave(Sequence s, float timePos, GameObject co)
     {
-        cardObjs.Remove(co);
-        CardObjectBehaviour cob = co.GetComponent<CardObjectBehaviour>();
-        cob.OriginPos = Pob.Grave.transform.position;
-        cob.State = CardState.GRAVE;
-        s.Insert(timePos, co.transform.DOMove(cob.OriginPos, GameConfig.F("BATTLE_CARD_DEATH_FLY_TIME")));
-        s.Insert(timePos, co.transform.DOScale(1.0f, GameConfig.F("BATTLE_CARD_SCALE_TIME")));
+        if (cardObjs.Remove(co))
+        {
+            CardObjectBehaviour cob = co.GetComponent<CardObjectBehaviour>();
+            cob.OriginPos = Pob.Grave.transform.position;
+            cob.State = CardState.GRAVE;
+            s.Insert(timePos, co.transform.DOMove(cob.OriginPos, GameConfig.F("BATTLE_CARD_DEATH_FLY_TIME")));
+            s.Insert(timePos, co.transform.DOScale(1.0f, GameConfig.F("BATTLE_CARD_SCALE_TIME")));
+        }
+        else
+        {
+            Debug.LogError(Environment.StackTrace);
+            throw new Exception("Removing invalid card object from card slot");
+        }
     }
 }

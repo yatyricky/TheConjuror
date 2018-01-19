@@ -390,25 +390,27 @@ public class BoardBehaviour : MonoBehaviour
 
         endTimeNode += GameConfig.F("BATTLE_AFTER_DAMAGE_INTV");
 
-        // Clear up
+        // Clean up
         s.InsertCallback(endTimeNode, () =>
         {
+            // Move deads to grave
+            for (int i = 0; i < akilled.Count; i++)
+            {
+                CardObjectBehaviour cob = CardObjectBehaviour.GetCOB(akilled.ElementAt(i).guid);
+                cob.Owner.CSob[acs].MoveToGrave(s, endTimeNode + GameConfig.F("BATTLE_CARD_INTERVAL") * i, cob.gameObject);
+            }
+            for (int i = 0; i < dkilled.Count; i++)
+            {
+                CardObjectBehaviour cob = CardObjectBehaviour.GetCOB(dkilled.ElementAt(i).guid);
+                cob.Owner.CSob[dcs].MoveToGrave(s, endTimeNode + GameConfig.F("BATTLE_CARD_INTERVAL") * i, cob.gameObject);
+            }
+            // Update player health/slot power
             if (aname.Equals(LocalPlayer.PlayerName))
             {
                 LocalPlayer.UpdateCardSlotPower(acs, aaap);
                 EnemyPlayer.UpdateCardSlotPower(dcs, daap);
                 LocalPlayer.UpdateHealth(ahp);
                 EnemyPlayer.UpdateHealth(dhp);
-
-                // Move deads to grave
-                for (int i = 0; i < akilled.Count; i++)
-                {
-                    LocalPlayer.CSob[acs].MoveToGrave(s, endTimeNode + GameConfig.F("BATTLE_CARD_INTERVAL") * i, CardObjectBehaviour.GetCOB(akilled.ElementAt(i).guid).gameObject);
-                }
-                for (int i = 0; i < dkilled.Count; i++)
-                {
-                    EnemyPlayer.CSob[dcs].MoveToGrave(s, endTimeNode + GameConfig.F("BATTLE_CARD_INTERVAL") * i, CardObjectBehaviour.GetCOB(dkilled.ElementAt(i).guid).gameObject);
-                }
             }
             else if (dname.Equals(LocalPlayer.PlayerName))
             {
@@ -416,15 +418,6 @@ public class BoardBehaviour : MonoBehaviour
                 EnemyPlayer.UpdateCardSlotPower(acs, aaap);
                 LocalPlayer.UpdateHealth(dhp);
                 EnemyPlayer.UpdateHealth(ahp);
-
-                for (int i = 0; i < akilled.Count; i++)
-                {
-                    EnemyPlayer.CSob[acs].MoveToGrave(s, endTimeNode + GameConfig.F("BATTLE_CARD_INTERVAL") * i, CardObjectBehaviour.GetCOB(akilled.ElementAt(i).guid).gameObject);
-                }
-                for (int i = 0; i < dkilled.Count; i++)
-                {
-                    LocalPlayer.CSob[dcs].MoveToGrave(s, endTimeNode + GameConfig.F("BATTLE_CARD_INTERVAL") * i, CardObjectBehaviour.GetCOB(dkilled.ElementAt(i).guid).gameObject);
-                }
             }
             for (int i = 0; i < atouched.Count; i++)
             {
@@ -438,7 +431,10 @@ public class BoardBehaviour : MonoBehaviour
                 CardObjectBehaviour cob = CardObjectBehaviour.GetCOB(item.guid);
                 cob.UpdatePower(item.power);
             }
+        });
 
+        s.OnComplete(() =>
+        {
             if (aname.Equals(LocalPlayer.PlayerName))
             {
                 LocalPlayer.CSob[acs].RerenderCards();
@@ -449,10 +445,6 @@ public class BoardBehaviour : MonoBehaviour
                 EnemyPlayer.CSob[acs].RerenderCards();
                 LocalPlayer.CSob[dcs].RerenderCards();
             }
-        });
-
-        s.OnComplete(() =>
-        {
             SetUIState(UIState.ACTION);
         });
 
@@ -534,11 +526,8 @@ public class BoardBehaviour : MonoBehaviour
         CardObjectBehaviour cob = CardObjectBehaviour.GetCOB((int)data[1]);
         int slot = (int)data[2];
         int power = (int)data[3];
-        cob.AddDoTweens(() =>
-        {
-            p.UpdateCardSlotPower(slot, power);
-            p.CSob[slot].AddCard(cob.gameObject);
-        });
+        p.CSob[slot].AddCard(cob.gameObject);
+        p.UpdateCardSlotPower(slot, power);
     }
 
     internal static void DiscardCardCallback(object[] data)
