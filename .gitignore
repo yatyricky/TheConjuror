@@ -1,0 +1,28 @@
+# ===== Unreal Engine 生成物（重新生成，不入库）=====
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+Plugins/**/Binaries/
+Plugins/**/Intermediate/
+
+# ===== Visual Studio 生成物 =====
+.vs/
+*.sln
+*.slnx
+*.suo
+*.user
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.VC.opendb
+ipch/
+
+# ===== 本地 AI 工具目录 =====
+.zcode/
+.deepseek/
+
+# ===== 系统杂项 =====
+Thumbs.db
+Desktop.ini
+

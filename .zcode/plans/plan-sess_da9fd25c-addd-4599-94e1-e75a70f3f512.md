@@ -1,21 +1,39 @@
-# The Conjuror 单机化改造 —— 阶段 0 + 阶段 1（不动 Unity 设置与 meta）
+# UEClient → TheConjuror 全量改名清单（基于 2026-09-12 21:37 现状扫描）
 
-## 约束
-- **不修改任何 Unity 工程设置文件**（ProjectSettings、packages、Addressables 配置等均不在代码侧改动）。
-- **不增删改任何 .meta 文件** —— 只移动/删除资源与脚本本体；由此产生的 meta 孤儿/引用问题，由用户之后在 Unity 6000.6.0 编辑器里打开时让 Unity 自行处理（如需辅助说明，改造完成后给出在编辑器内的操作清单）。
-- 只做：删除文件/目录、移动资源、编写/修改 C# 代码。
+## 一、重命名文件（7 处）
+| 旧 | 新 |
+|---|---|
+| `UEClient.uproject` | `TheConjuror.uproject` |
+| `Source/UEClient.Target.cs` | `TheConjuror.Target.cs` |
+| `Source/UEClientEditor.Target.cs` | `TheConjurorEditor.Target.cs` |
+| `Source/UEClient/`（目录） | `Source/TheConjuror/` |
+| `…/UEClient.Build.cs` | `TheConjuror.Build.cs` |
+| `…/UEClient.h` | `TheConjuror.h` |
+| `…/UEClient.cpp` | `TheConjuror.cpp` |
 
-## 阶段 0：清理网络相关
-1. 删除 `Server/` 目录。
-2. 删除 `Client/Assets/SocketIO/` 插件目录（本体文件，不碰 meta）。
-3. 删除 `NetworkController.cs` 及其他纯网络用途脚本；清理引用它们的代码（如 `BoardBehaviour` 中的调用），保证 C# 侧逻辑自洽（不依赖已被删除的类型）。
+## 二、文件内容替换
+1. **TheConjuror.uproject**：`"Name": "UEClient"` → `"TheConjuror"`（其余不动：5.8 关联、VisualStudioTools/ModelingTools 插件保留）。
+2. **TheConjuror.Build.cs**：`class UEClient : ModuleRules` 及构造函数名 → `TheConjuror`（依赖列表 Core/CoreUObject/Engine/InputCore/EnhancedInput 不动）。
+3. **TheConjuror.h**：仅 `#include "CoreMinimal.h"`，无需内容修改。
+4. **TheConjuror.cpp**：`#include "UEClient.h"` → `"TheConjuror.h"`；`IMPLEMENT_PRIMARY_GAME_MODULE(FDefaultGameModuleImpl, UEClient, "UEClient")` → `(FDefaultGameModuleImpl, TheConjuror, "TheConjuror")`。
+5. **TheConjuror.Target.cs**：类 `UEClientTarget` → `TheConjurorTarget`；`ExtraModuleNames.Add("UEClient")` → `"TheConjuror"`（BuildSettingsVersion.V7 / Unreal5_8 保持）。
+6. **TheConjurorEditor.Target.cs**：类 `UEClientEditorTarget` → `TheConjurorEditorTarget`；`ExtraModuleNames` 同上。
+7. **Config/DefaultEngine.ini**（本次新发现的关键点）：两行 GameName 重定向改目标
+   `+ActiveGameNameRedirects=(OldGameName="TP_Blank",NewGameName="/Script/UEClient")` 与 `…"/Script/TP_Blank"…` → `NewGameName="/Script/TheConjuror"`（OldGameName 保留）。
 
-## 阶段 1：Addressables 资源加载骨架（代码与资源移动部分）
-1. 盘点 `Resources/` 下预制体与所有 `Resources.Load` 调用点。
-2. 编写 `AssetService`：基于 Unity Addressables API 的异步加载封装 —— `LoadAssetAsync` / `InstantiateAsync` / `Release`、句柄管理（实例销毁时释放）、key 常量或 ScriptableObject/JSON 配置映射。
-3. 将现有 `Resources.Load` 调用点改写为走 `AssetService`。
-4. 资源本体移出 `Resources` 目录到约定的新目录结构（如 `Assets/AddressableAssets/Cards|UI|Effects|Players`），只移动文件本体。
-5. 输出一份“编辑器内后续操作清单”文档：安装 Addressables 包、标记资源为 Addressable、设置分组与 key（需与代码中 key 规范一致）、在 Unity 6000.6.0 下打开工程完成升级与编译修复。
+## 三、删除生成物（重新生成，不入库）
+`UEClient.sln`、`UEClient.slnx`、`Automation_UEClient.sln`、`Automation_UEClient.slnx`、`Binaries/`、`Intermediate/`、`DerivedDataCache/`、`Saved/`、`.vs/`
 
-## 不做（押后）
-- Unity 版本升级的具体设置、Addressables 编辑器配置、规则引擎/玩法/AI（等核心玩法文档）。
+## 四、确认无需改动（已扫描验证）
+- `Content/`（.umap、__ExternalActors__、textures、Collections/Developers）：grep 无 UEClient 引用，路径全部是 /Game/ 对象路径，与模块名解耦。
+- `.vsconfig`、`.editorconfig`、`README.md`、`docs/`：无引用（docs 历史文档本就不动）。
+- 模块头文件无 UECLIENT_API/日志类别（5.8 空模板比预期干净）。
+
+## 五、验证
+- 定位 UE 5.8 安装路径（预计 C:\Program Files\Epic Games\UE_5.8），命令行 GenerateProjectFiles + Build `TheConjurorEditor Win64 Development` 确认编译通过；若 VS 工具链仍未就绪则交付“改名完成、待重试”清单。
+
+## 前置条件（你侧）
+改名开始前关闭 UE 编辑器和 Visual Studio。
+
+## 改名后建议（本次不含）
+补 `.gitignore`/`.gitattributes`（LFS）、`Content/TheConjuror/` 命名空间目录。
